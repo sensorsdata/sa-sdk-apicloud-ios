@@ -1,0 +1,8 @@
+[
+ {
+    "name":"sensorsAnalyticsAPICloudSDK",
+    "class":"SensorsAnalyticsAPICloudSDK",
+    "methods":["sharedInstance","login","track","flush"],
+    "launchClassMethod":"launch"
+ }
+]
