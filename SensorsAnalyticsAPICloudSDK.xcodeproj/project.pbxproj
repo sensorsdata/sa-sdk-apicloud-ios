@@ -7,12 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A5B637AB1DEFCAD60059D756 /* libz.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A5B637AA1DEFCAD60059D756 /* libz.1.dylib */; };
-		A5B637AD1DEFCC510059D756 /* libicucore.A.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A5B637AC1DEFCC510059D756 /* libicucore.A.dylib */; };
-		A5B637AF1DEFCC6E0059D756 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A5B637AE1DEFCC6E0059D756 /* libsqlite3.dylib */; };
+		A17F4C162175C1660044F316 /* libSensorsAnalyticsSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A17F4C142175C1660044F316 /* libSensorsAnalyticsSDK.a */; };
+		A17F4C172175C1A10044F316 /* SensorsAnalyticsAPICloudSDK.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = A5B637B01DEFCD4F0059D756 /* SensorsAnalyticsAPICloudSDK.h */; };
+		A17F4C182175C1FA0044F316 /* SensorsAnalyticsSDK.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = A17F4C152175C1660044F316 /* SensorsAnalyticsSDK.bundle */; };
 		A5B637B21DEFCD4F0059D756 /* SensorsAnalyticsAPICloudSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = A5B637B11DEFCD4F0059D756 /* SensorsAnalyticsAPICloudSDK.m */; };
-		A5E3B03E1DFBAEA900786846 /* HLWZSutil.m in Sources */ = {isa = PBXBuildFile; fileRef = A5E3B03D1DFBAEA900786846 /* HLWZSutil.m */; };
-		A5E3B0421DFBAEFE00786846 /* libSensorsAnalyticsSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A5E3B0401DFBAEFE00786846 /* libSensorsAnalyticsSDK.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -22,30 +20,31 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
+				A17F4C182175C1FA0044F316 /* SensorsAnalyticsSDK.bundle in CopyFiles */,
+				A17F4C172175C1A10044F316 /* SensorsAnalyticsAPICloudSDK.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A17F4C122175C1660044F316 /* SensorsAnalyticsSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SensorsAnalyticsSDK.h; sourceTree = "<group>"; };
+		A17F4C132175C1660044F316 /* SAAppExtensionDataManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SAAppExtensionDataManager.h; sourceTree = "<group>"; };
+		A17F4C142175C1660044F316 /* libSensorsAnalyticsSDK.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libSensorsAnalyticsSDK.a; sourceTree = "<group>"; };
+		A17F4C152175C1660044F316 /* SensorsAnalyticsSDK.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = SensorsAnalyticsSDK.bundle; sourceTree = "<group>"; };
+		A1FDA39C216B68A4002A7180 /* UIViewControllerExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIViewControllerExtension.h; sourceTree = "<group>"; };
+		A1FDA39D216B68A4002A7180 /* UZURLTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UZURLTask.h; sourceTree = "<group>"; };
+		A1FDA39E216B68A4002A7180 /* UZModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UZModule.h; sourceTree = "<group>"; };
+		A1FDA39F216B68A4002A7180 /* UZAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UZAppDelegate.h; sourceTree = "<group>"; };
+		A1FDA3A0216B68A4002A7180 /* UZAppUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UZAppUtils.h; sourceTree = "<group>"; };
+		A1FDA3A1216B68A4002A7180 /* NSDictionaryUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDictionaryUtils.h; sourceTree = "<group>"; };
 		A5B6372F1DEEEC0F0059D756 /* libSensorsAnalyticsAPICloudSDK.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSensorsAnalyticsAPICloudSDK.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		A5B6373B1DEEEC870059D756 /* NSDictionaryUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDictionaryUtils.h; sourceTree = "<group>"; };
-		A5B6373C1DEEEC870059D756 /* UZAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UZAppDelegate.h; sourceTree = "<group>"; };
-		A5B6373D1DEEEC870059D756 /* UZAppUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UZAppUtils.h; sourceTree = "<group>"; };
-		A5B6373E1DEEEC870059D756 /* UZModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UZModule.h; sourceTree = "<group>"; };
 		A5B637A21DEEEE560059D756 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		A5B637A41DEEEE6A0059D756 /* libicucore.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libicucore.tbd; path = usr/lib/libicucore.tbd; sourceTree = SDKROOT; };
 		A5B637A61DEEEE790059D756 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
-		A5B637AA1DEFCAD60059D756 /* libz.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.dylib; path = ../../../../../../../usr/lib/libz.1.dylib; sourceTree = "<group>"; };
-		A5B637AC1DEFCC510059D756 /* libicucore.A.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicucore.A.dylib; path = ../../../../../../../usr/lib/libicucore.A.dylib; sourceTree = "<group>"; };
-		A5B637AE1DEFCC6E0059D756 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = ../../../../../../../usr/lib/libsqlite3.dylib; sourceTree = "<group>"; };
 		A5B637B01DEFCD4F0059D756 /* SensorsAnalyticsAPICloudSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SensorsAnalyticsAPICloudSDK.h; sourceTree = "<group>"; };
 		A5B637B11DEFCD4F0059D756 /* SensorsAnalyticsAPICloudSDK.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SensorsAnalyticsAPICloudSDK.m; sourceTree = "<group>"; };
 		A5B637B41DF039BF0059D756 /* module.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = module.json; path = "Supporting Files/module.json"; sourceTree = "<group>"; };
-		A5E3B03C1DFBAEA900786846 /* HLWZSutil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HLWZSutil.h; path = utils/HLWZSutil.h; sourceTree = "<group>"; };
-		A5E3B03D1DFBAEA900786846 /* HLWZSutil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = HLWZSutil.m; path = utils/HLWZSutil.m; sourceTree = "<group>"; };
-		A5E3B0401DFBAEFE00786846 /* libSensorsAnalyticsSDK.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSensorsAnalyticsSDK.a; path = libs/libSensorsAnalyticsSDK.a; sourceTree = "<group>"; };
-		A5E3B0411DFBAEFE00786846 /* SensorsAnalyticsSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SensorsAnalyticsSDK.h; path = libs/SensorsAnalyticsSDK.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,16 +52,46 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A5B637AD1DEFCC510059D756 /* libicucore.A.dylib in Frameworks */,
-				A5E3B0421DFBAEFE00786846 /* libSensorsAnalyticsSDK.a in Frameworks */,
-				A5B637AF1DEFCC6E0059D756 /* libsqlite3.dylib in Frameworks */,
-				A5B637AB1DEFCAD60059D756 /* libz.1.dylib in Frameworks */,
+				A17F4C162175C1660044F316 /* libSensorsAnalyticsSDK.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A17F4C102175C1660044F316 /* SensorsAnalyticsSDK */ = {
+			isa = PBXGroup;
+			children = (
+				A17F4C112175C1660044F316 /* include */,
+				A17F4C142175C1660044F316 /* libSensorsAnalyticsSDK.a */,
+				A17F4C152175C1660044F316 /* SensorsAnalyticsSDK.bundle */,
+			);
+			name = SensorsAnalyticsSDK;
+			path = libs/SensorsAnalyticsSDK;
+			sourceTree = "<group>";
+		};
+		A17F4C112175C1660044F316 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				A17F4C122175C1660044F316 /* SensorsAnalyticsSDK.h */,
+				A17F4C132175C1660044F316 /* SAAppExtensionDataManager.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		A1FDA39B216B68A4002A7180 /* UZEngine */ = {
+			isa = PBXGroup;
+			children = (
+				A1FDA39C216B68A4002A7180 /* UIViewControllerExtension.h */,
+				A1FDA39D216B68A4002A7180 /* UZURLTask.h */,
+				A1FDA39E216B68A4002A7180 /* UZModule.h */,
+				A1FDA39F216B68A4002A7180 /* UZAppDelegate.h */,
+				A1FDA3A0216B68A4002A7180 /* UZAppUtils.h */,
+				A1FDA3A1216B68A4002A7180 /* NSDictionaryUtils.h */,
+			);
+			path = UZEngine;
+			sourceTree = "<group>";
+		};
 		A5B637261DEEEC0F0059D756 = {
 			isa = PBXGroup;
 			children = (
@@ -84,14 +113,10 @@
 		A5B637311DEEEC0F0059D756 /* SensorsAnalyticsAPICloudSDK */ = {
 			isa = PBXGroup;
 			children = (
-				A5B6373B1DEEEC870059D756 /* NSDictionaryUtils.h */,
-				A5B6373C1DEEEC870059D756 /* UZAppDelegate.h */,
-				A5B6373D1DEEEC870059D756 /* UZAppUtils.h */,
-				A5B6373E1DEEEC870059D756 /* UZModule.h */,
+				A1FDA39B216B68A4002A7180 /* UZEngine */,
 				A5B637B01DEFCD4F0059D756 /* SensorsAnalyticsAPICloudSDK.h */,
 				A5B637B11DEFCD4F0059D756 /* SensorsAnalyticsAPICloudSDK.m */,
 				A5E3B03F1DFBAEBB00786846 /* libs */,
-				A5E3B03B1DFBAE8300786846 /* utils */,
 			);
 			path = SensorsAnalyticsAPICloudSDK;
 			sourceTree = "<group>";
@@ -99,9 +124,6 @@
 		A5B637A11DEEEE560059D756 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				A5B637AE1DEFCC6E0059D756 /* libsqlite3.dylib */,
-				A5B637AC1DEFCC510059D756 /* libicucore.A.dylib */,
-				A5B637AA1DEFCAD60059D756 /* libz.1.dylib */,
 				A5B637A61DEEEE790059D756 /* libsqlite3.tbd */,
 				A5B637A41DEEEE6A0059D756 /* libicucore.tbd */,
 				A5B637A21DEEEE560059D756 /* libz.tbd */,
@@ -118,20 +140,10 @@
 			path = SensorsAnalyticsAPICloudSDK;
 			sourceTree = "<group>";
 		};
-		A5E3B03B1DFBAE8300786846 /* utils */ = {
-			isa = PBXGroup;
-			children = (
-				A5E3B03C1DFBAEA900786846 /* HLWZSutil.h */,
-				A5E3B03D1DFBAEA900786846 /* HLWZSutil.m */,
-			);
-			name = utils;
-			sourceTree = "<group>";
-		};
 		A5E3B03F1DFBAEBB00786846 /* libs */ = {
 			isa = PBXGroup;
 			children = (
-				A5E3B0401DFBAEFE00786846 /* libSensorsAnalyticsSDK.a */,
-				A5E3B0411DFBAEFE00786846 /* SensorsAnalyticsSDK.h */,
+				A17F4C102175C1660044F316 /* SensorsAnalyticsSDK */,
 			);
 			name = libs;
 			sourceTree = "<group>";
@@ -162,7 +174,7 @@
 		A5B637271DEEEC0F0059D756 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0810;
+				LastUpgradeCheck = 1000;
 				ORGANIZATIONNAME = "肖彦敏";
 				TargetAttributes = {
 					A5B6372E1DEEEC0F0059D756 = {
@@ -194,7 +206,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A5E3B03E1DFBAEA900786846 /* HLWZSutil.m in Sources */,
 				A5B637B21DEFCD4F0059D756 /* SensorsAnalyticsAPICloudSDK.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -211,15 +222,24 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -242,9 +262,9 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
-				ONLY_ACTIVE_ARCH = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -258,15 +278,24 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -283,7 +312,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -293,35 +322,39 @@
 		A5B637391DEEEC0F0059D756 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				DEVELOPMENT_TEAM = HV254G4R5S;
 				ENABLE_BITCODE = NO;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/SensorsAnalyticsAPICloudSDK",
 					"$(PROJECT_DIR)/SensorsAnalyticsAPICloudSDK/libs",
+					"$(PROJECT_DIR)/SensorsAnalyticsAPICloudSDK/libs/SensorsAnalyticsSDK",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				VALID_ARCHS = "arm64 armv7 armv7s x86_64 i386";
 			};
 			name = Debug;
 		};
 		A5B6373A1DEEEC0F0059D756 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				DEVELOPMENT_TEAM = HV254G4R5S;
 				ENABLE_BITCODE = NO;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/SensorsAnalyticsAPICloudSDK",
 					"$(PROJECT_DIR)/SensorsAnalyticsAPICloudSDK/libs",
+					"$(PROJECT_DIR)/SensorsAnalyticsAPICloudSDK/libs/SensorsAnalyticsSDK",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				VALID_ARCHS = "arm64 armv7 armv7s x86_64 i386";
 			};
 			name = Release;
 		};
