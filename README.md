@@ -23,7 +23,7 @@ sensorsAnalyticsAPICloudSDK 模块的具体试用步骤如下：
 <param name="serverURL" value="数据接收地址URL"/>
 <param name="debugMode" value="debugOff"/>
 <param name="enableAutoTrack" value="true"/>
-<param name="downloadChannel" value="应用宝" />
+<param name="downloadChannel" value="AppStore" />
 <param name="enableLog" value="false"/>
 </feature>   
 ```
