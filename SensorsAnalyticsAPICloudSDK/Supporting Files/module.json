@@ -2,7 +2,8 @@
  {
     "name":"sensorsAnalyticsAPICloudSDK",
     "class":"SensorsAnalyticsAPICloudSDK",
-    "methods":["sharedInstance","login","track","flush"],
+    "methods":["enableLog","login","track","flush","registerSuperProperties","unregisterSuperProperty","identify","trackInstallation","trackTimerStart","trackTimerEnd","clearTrackTimer","logout","profileSet","profileSetOnce","profileUnset","profileIncrement","profileAppend","profileDelete","trackViewScreen","deleteAll","setServerUrl"],
+    "syncMethods":["getDistinctId"],
     "launchClassMethod":"launch"
  }
 ]
