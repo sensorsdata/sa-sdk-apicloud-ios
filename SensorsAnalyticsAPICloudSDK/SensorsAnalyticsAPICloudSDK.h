@@ -346,4 +346,12 @@
  * }
  */
 -(void)setServerUrl:(NSDictionary *)paramsDict;
+
+/**
+ * @abstract
+ * 删除keyChain数据
+ * @param paramsDict 无参数
+ */
+-(void)clearKeyChainData:(NSDictionary *)paramsDict;
+
 @end

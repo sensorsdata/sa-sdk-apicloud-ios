@@ -83,4 +83,3 @@ IsAddedToFav: false
 通过 Debug 模式，可以校验追踪的事件及属性是否正确。普通模式下，数据导入后，在 Sensors Analytics 中稍等片刻，便能看到追踪结果。请注意，**不要在正式发布的 App 中使用 Debug 模式**。
 
 ![](https://www.sensorsdata.cn/manual/img/ios_sdk_1.png)
-
