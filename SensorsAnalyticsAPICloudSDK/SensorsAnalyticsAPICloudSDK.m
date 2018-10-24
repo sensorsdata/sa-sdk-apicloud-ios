@@ -20,7 +20,7 @@
 
 + (void)launch{
     @try {
-        NSDictionary *feature = [UZAppDelegate.appDelegate getFeatureByName:@"SensorsAnalyticsAPICloudSDK"];
+        NSDictionary *feature = [UZAppDelegate.appDelegate getFeatureByName:@"sensorsAnalyticsAPICloudSDK"];
         NSString *serverURL = [feature stringValueForKey:@"serverURL" defaultValue:nil];
         NSString *debugMode = [feature stringValueForKey:@"debugMode" defaultValue:nil];
         BOOL enableLog = [feature boolValueForKey:@"enableLog" defaultValue:NO];
@@ -29,7 +29,6 @@
         //校验debugMode
         SensorsAnalyticsDebugMode mode;
         if (debugMode.length > 0) {
-           
                 if ([debugMode isEqualToString:@"debugOnly"]) {
                     mode = SensorsAnalyticsDebugOnly;
                 }else if ([debugMode isEqualToString:@"debugAndTrack"]){
@@ -48,7 +47,7 @@
         if (serverURL.length > 0) {
             [SensorsAnalyticsSDK sharedInstanceWithServerURL:serverURL andDebugMode:mode];
             if (downloadChannel.length > 0) {
-                [SensorsAnalyticsSDK.sharedInstance trackInstallation:@"AppInstall" withProperties:@{@"downloadChannel":downloadChannel}];
+                [SensorsAnalyticsSDK.sharedInstance trackInstallation:@"AppInstall" withProperties:@{@"DownloadChannel":downloadChannel}];
             }
             [SensorsAnalyticsSDK.sharedInstance enableLog:enableLog];
             if (enableAutoTrack) {
@@ -311,4 +310,9 @@
         
     }
 }
+
+-(void)clearKeyChainData:(NSDictionary *)paramsDict{
+    [SensorsAnalyticsSDK.sharedInstance clearKeychainData];
+}
+
 @end
