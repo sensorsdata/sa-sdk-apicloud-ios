@@ -46,6 +46,8 @@
         }
         //校验serverURL
         if (serverURL.length > 0) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             [SensorsAnalyticsSDK sharedInstanceWithServerURL:serverURL andDebugMode:mode];
             if (downloadChannel.length > 0) {
                 [SensorsAnalyticsSDK.sharedInstance trackInstallation:@"AppInstall" withProperties:@{@"downloadChannel":downloadChannel}];
@@ -54,6 +56,7 @@
             if (enableAutoTrack) {
                 [SensorsAnalyticsSDK.sharedInstance enableAutoTrack:SensorsAnalyticsEventTypeAppStart|SensorsAnalyticsEventTypeAppEnd];
             }
+#pragma clang diagnostic pop
         }else {
             if (![debugMode isEqualToString:@"debugOff"]) {
                 [SensorsAnalyticsAPICloudSDK showErrorMessage:@"serverURL(收集事件的服务地址)为空,请检查传入值"];
@@ -277,7 +280,10 @@
     @try {
         NSString *urlString = [paramsDict stringValueForKey:@"url" defaultValue:nil];
         NSDictionary *properties = [paramsDict dictValueForKey:@"properties" defaultValue:nil];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         [SensorsAnalyticsSDK.sharedInstance trackViewScreen:urlString withProperties:properties];
+#pragma clang diagnostic pop
     } @catch (NSException *exception) {
         
     }
