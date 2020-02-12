@@ -20,7 +20,7 @@
 
 + (void)launch{
     @try {
-        NSDictionary *feature = [UZAppDelegate.appDelegate getFeatureByName:@"SensorsAnalyticsAPICloudSDK"];
+        NSDictionary *feature = [UZAppDelegate.appDelegate getFeatureByName:@"sensorsAnalyticsAPICloudSDK"];
         NSString *serverURL = [feature stringValueForKey:@"serverURL" defaultValue:nil];
         NSString *debugMode = [feature stringValueForKey:@"debugMode" defaultValue:nil];
         BOOL enableLog = [feature boolValueForKey:@"enableLog" defaultValue:NO];
