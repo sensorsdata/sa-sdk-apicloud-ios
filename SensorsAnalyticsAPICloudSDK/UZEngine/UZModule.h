@@ -19,8 +19,9 @@ typedef enum _KUZStringType {
 
 @interface UZModule : NSObject
 
-@property (nonatomic, readonly) UZWebView *uzWebView;
+@property (nonatomic, weak, readonly) UZWebView *uzWebView;
 @property (nonatomic, readonly) UIViewController *viewController;
+@property (nonatomic, readonly) UINavigationController *navigationController;
 @property (nonatomic, readonly) NSString *widgetId;
 
 #pragma mark - lifeCycle
@@ -77,6 +78,7 @@ typedef enum _KUZStringType {
  @param js 要执行的javascript代码
  */
 - (void)evalJs:(NSString *)js;
+- (void)evalJs:(NSString *)js completionHandler:(void (^)(id result, NSError *error))completionHandler;
 
 #pragma mark - methods
 
@@ -138,6 +140,16 @@ typedef enum _KUZStringType {
 - (BOOL)addSubview:(UIView *)view fixedOn:(NSString *)fixedOn fixed:(BOOL)fixed;
 
 /**
+ 设置视图约束。调用此方法时请确保视图已经添加到父视图上面。
+ 
+ @param view 视图
+ 
+ @param rect 视图位置信息，参考api.openFrame方法的rect参数，https://docs.apicloud.com/Client-API/api#27
+ */
+- (void)view:(UIView *)view addConstraintsWithRect:(NSDictionary *)rect;
+- (void)view:(UIView *)view updateConstraintsWithRect:(NSDictionary *)rect;
+
+/**
  设置视图是否屏蔽侧滑布局滑动手势
  
  @param view 视图
@@ -166,6 +178,13 @@ typedef enum _KUZStringType {
  @param message 错误信息
  */
 + (void)showErrorMessage:(NSString *)message;
+
+/**
+ 如果需要在应用启动时做一些操作，子类可以实现该方法来处理。
+ 
+ @param launchOptions 应用启动时的参数信息
+ */
++ (void)onAppLaunch:(NSDictionary *)launchOptions;
 
 @end
 
@@ -214,3 +233,19 @@ typedef enum _KUZStringType {
 
 @end
 
+
+@interface UZModuleMethodContext : NSObject
+
+@property (nonatomic, weak, readonly) UZModule *module;
+@property (nonatomic, strong, readonly) NSDictionary *param;
+
+- (void)callbackWithRet:(id)ret err:(id)err delete:(BOOL)del;
+
+@end
+
+
+#define JS_METHOD(method)   \
+- (void)jsmethod_##method
+
+#define JS_METHOD_SYNC(method)   \
+- (id)jsmethod_sync_##method

@@ -20,5 +20,6 @@
 - (NSArray *)arrayValueForKey:(NSString *)key defaultValue:(NSArray *)defaultValue;
 - (NSDictionary *)dictValueForKey:(NSString *)key defaultValue:(NSDictionary *)defaultValue;
 - (CGRect)rectValueForKey:(NSString *)key defaultValue:(CGRect)defaultValue relativeToSuperView:(UIView *)superView;
+- (CGRect)rectValueRelativeToSuperView:(UIView *)superView;
 
 @end

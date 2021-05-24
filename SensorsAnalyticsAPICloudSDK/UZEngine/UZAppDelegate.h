@@ -7,9 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <UserNotifications/UserNotifications.h>
 
 @interface UZAppDelegate : UIResponder
-<UIApplicationDelegate>
+<UIApplicationDelegate, UNUserNotificationCenterDelegate>
 
 + (instancetype)appDelegate;
 

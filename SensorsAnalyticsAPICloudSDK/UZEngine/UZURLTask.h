@@ -15,20 +15,24 @@ typedef void (^UZURLTaskHeadersBlock)(NSDictionary *responseHeaders);
 typedef void (^UZURLTaskProgressBlock)(int64_t bytes, int64_t total);
 typedef void (^UZURLTaskCompletionBlock)(UZURLResponse *response);
 typedef void (^UZURLTaskFailedBlock)(NSError *error);
+typedef void (^UZURLTaskRedirectedBlock)(NSURL *redirectedURL);
 
 @interface UZURLTask : NSObject
 
-@property (nullable, copy) NSString *taskIdentifier;
+@property (readonly, copy) NSString *taskIdentifier;
 
 + (instancetype)taskWithRequest:(UZURLRequest *)request;
 
 @property (nullable, readonly, strong) UZURLRequest *request;
+
+@property (nullable, readonly, strong) UZURLResponse *response;
 
 @property (nullable, copy) UZURLTaskHeadersBlock headersReceivedBlock;  // 收到响应头的回调
 @property (nullable, copy) UZURLTaskCompletionBlock completionBlock;    // 请求成功的回调
 @property (nullable, copy) UZURLTaskFailedBlock failedBlock;            // 请求失败的回调
 @property (nullable, copy) UZURLTaskProgressBlock bytesSentBlock;       // 发送数据进度回调
 @property (nullable, copy) UZURLTaskProgressBlock bytesReceivedBlock;   // 收到数据进度回调
+@property (nullable, copy) UZURLTaskRedirectedBlock redirectedBlock;    // 重定向的回调
 
 @property (readonly) int64_t countOfBytesSent;              // 已发送的数据大小
 @property (readonly) int64_t countOfBytesExpectedToSend;    // 要发送的总数据大小
@@ -48,8 +52,8 @@ typedef void (^UZURLTaskFailedBlock)(NSError *error);
 
 @interface UZURLDownloadTask : UZURLTask
 
-@property (nullable, copy) NSString *storagePath;       // 存储文件夹
-@property (nullable, copy) NSString *savePath;          // 存储路径，若不赋值将自动生成路径
+@property (nonatomic, copy) NSString *storagePath;       // 存储文件夹
+@property (nonatomic, copy) NSString *savePath;          // 存储路径，若不赋值将自动生成路径
 
 @property BOOL allowResume;     // 是否允许断点续传
 

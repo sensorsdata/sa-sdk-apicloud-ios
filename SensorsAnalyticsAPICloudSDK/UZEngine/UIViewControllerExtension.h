@@ -19,6 +19,13 @@ typedef enum {
 @property (nonatomic) BOOL slidBackEnabled;         //是否允许滑动返回
 @property (nonatomic) SlidBackType slidBackType;    //滑动返回类型
 
+/*
+ 设置控制器是否处理旋转事件，如果设置为YES，那么控制器就可以实现以下旋转方法来控制横竖屏旋转。
+ - (BOOL)shouldAutorotate
+ - (UIInterfaceOrientationMask)supportedInterfaceOrientations
+ */
+@property (nonatomic) BOOL supportRotate;
+
 @end
 
 
