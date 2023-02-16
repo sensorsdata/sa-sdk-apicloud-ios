@@ -3,7 +3,7 @@
 // SensorsAnalyticsSDK
 //
 // Created by 张敏超🍎 on 2020/6/18.
-// Copyright © 2020 Sensors Data Co., Ltd. All rights reserved.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -54,10 +54,9 @@ static long recordIndex = 0;
     if (self = [super init]) {
         _recordID = recordID;
 
-        NSData *jsonData = [content dataUsingEncoding:NSUTF8StringEncoding];
-        if (jsonData) {
-            _event = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
-
+        NSMutableDictionary *eventDic = [SAJSONUtil JSONObjectWithString:content options:NSJSONReadingMutableContainers];
+        if (eventDic) {
+            _event = eventDic;
             _encrypted = _event[SAEncryptRecordKeyEKey] != nil;
         }
     }
@@ -65,17 +64,23 @@ static long recordIndex = 0;
 }
 
 - (NSString *)content {
-    NSData *data = [SAJSONUtil JSONSerializeObject:self.event];
-    return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    return [SAJSONUtil stringWithJSONObject:self.event];
 }
 
 - (BOOL)isValid {
     return self.event.count > 0;
 }
 
-- (void)addFlushTime {
+- (NSString *)flushContent {
+    if (![self isValid]) {
+        return nil;
+    }
+
+    // 需要先添加 flush time，再进行 json 拼接
     UInt64 time = [[NSDate date] timeIntervalSince1970] * 1000;
     _event[self.encrypted ? @"flush_time" : @"_flush_time"] = @(time);
+    
+    return self.content;
 }
 
 - (NSString *)ekey {
@@ -93,6 +98,9 @@ static long recordIndex = 0;
 }
 
 - (void)removePayload {
+    if (!_event[SAEncryptRecordKeyPayload]) {
+        return;
+    }
     _event[SAEncryptRecordKeyPayloads] = [NSMutableArray arrayWithObject:_event[SAEncryptRecordKeyPayload]];
     [_event removeObjectForKey:SAEncryptRecordKeyPayload];
 }
@@ -102,7 +110,6 @@ static long recordIndex = 0;
         return NO;
     }
     [(NSMutableArray *)_event[SAEncryptRecordKeyPayloads] addObject:record.event[SAEncryptRecordKeyPayload]];
-    [_event removeObjectForKey:SAEncryptRecordKeyPayload];
     return YES;
 }
 

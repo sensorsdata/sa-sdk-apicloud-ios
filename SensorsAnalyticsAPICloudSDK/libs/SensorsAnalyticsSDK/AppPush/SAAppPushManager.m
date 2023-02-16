@@ -3,7 +3,7 @@
 // SensorsAnalyticsSDK
 //
 // Created by 陈玉国 on 2021/1/18.
-// Copyright © 2021 Sensors Data Co., Ltd. All rights reserved.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,13 +26,25 @@
 #import "SAApplicationDelegateProxy.h"
 #import "SASwizzle.h"
 #import "SALog.h"
-#import "UIApplication+PushClick.h"
+#import "UIApplication+SAPushClick.h"
+#import "SensorsAnalyticsSDK+Private.h"
+#import "SAMethodHelper.h"
+#import "SAConfigOptions+AppPush.h"
 
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
 #import "SAUNUserNotificationCenterDelegateProxy.h"
 #endif
 
 @implementation SAAppPushManager
+
++ (instancetype)defaultManager {
+    static dispatch_once_t onceToken;
+    static SAAppPushManager *manager = nil;
+    dispatch_once(&onceToken, ^{
+        manager = [[SAAppPushManager alloc] init];
+    });
+    return manager;
+}
 
 - (void)setEnable:(BOOL)enable {
     _enable = enable;
@@ -41,11 +53,16 @@
     }
 }
 
-- (void)setLaunchOptions:(NSDictionary *)launchOptions {
-    [UIApplication sharedApplication].sensorsdata_launchOptions = launchOptions;
+- (void)setConfigOptions:(SAConfigOptions *)configOptions {
+    _configOptions = configOptions;
+    [UIApplication sharedApplication].sensorsdata_launchOptions = configOptions.launchOptions;
+    self.enable = configOptions.enableTrackPush;
 }
 
 - (void)proxyNotifications {
+    //处理未实现代理方法也能采集事件的逻辑
+    [SAMethodHelper swizzleRespondsToSelector];
+    
     //UIApplicationDelegate proxy
     [SAApplicationDelegateProxy resolveOptionalSelectorsForDelegate:[UIApplication sharedApplication].delegate];
     [SAApplicationDelegateProxy proxyDelegate:[UIApplication sharedApplication].delegate selectors:[NSSet setWithArray:@[@"application:didReceiveLocalNotification:", @"application:didReceiveRemoteNotification:fetchCompletionHandler:"]]];

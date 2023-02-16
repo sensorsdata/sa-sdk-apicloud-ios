@@ -1,21 +1,21 @@
 //
-//  SAConstants.h
-//  SensorsAnalyticsSDK
+// SAConstants.h
+// SensorsAnalyticsSDK
 //
-//  Created by 向作为 on 2018/8/9.
-//  Copyright © 2015-2020 Sensors Data Co., Ltd. All rights reserved.
+// Created by 向作为 on 2018/8/9.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 //
 
 #import <Foundation/Foundation.h>
@@ -93,14 +93,13 @@ typedef NS_OPTIONS(NSInteger, SensorsAnalyticsAutoTrackEventType) {
  *   SensorsAnalyticsNetworkType5G - 5G   
  */
 typedef NS_OPTIONS(NSInteger, SensorsAnalyticsNetworkType) {
-    SensorsAnalyticsNetworkTypeNONE     = 0,
-    SensorsAnalyticsNetworkType2G       = 1 << 0,
-    SensorsAnalyticsNetworkType3G       = 1 << 1,
-    SensorsAnalyticsNetworkType4G       = 1 << 2,
+    SensorsAnalyticsNetworkTypeNONE         = 0,
+    SensorsAnalyticsNetworkType2G API_UNAVAILABLE(macos)    = 1 << 0,
+    SensorsAnalyticsNetworkType3G API_UNAVAILABLE(macos)    = 1 << 1,
+    SensorsAnalyticsNetworkType4G API_UNAVAILABLE(macos)    = 1 << 2,
     SensorsAnalyticsNetworkTypeWIFI     = 1 << 3,
     SensorsAnalyticsNetworkTypeALL      = 0xFF,
-
 #ifdef __IPHONE_14_1
-    SensorsAnalyticsNetworkType5G = 1 << 4,
+    SensorsAnalyticsNetworkType5G API_UNAVAILABLE(macos)   = 1 << 4
 #endif
 };

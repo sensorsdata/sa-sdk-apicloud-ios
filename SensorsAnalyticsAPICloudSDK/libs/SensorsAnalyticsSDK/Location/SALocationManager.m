@@ -1,21 +1,21 @@
 //
-//  SALocationManager.m
-//  SensorsAnalyticsSDK
+// SALocationManager.m
+// SensorsAnalyticsSDK
 //
-//  Created by 向作为 on 2018/5/7.
-//  Copyright © 2015-2020 Sensors Data Co., Ltd. All rights reserved.
+// Created by 向作为 on 2018/5/7.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 //
 
 #if ! __has_feature(objc_arc)
@@ -27,8 +27,10 @@
 #import "SAConstants+Private.h"
 #import "SALog.h"
 
-static NSString * const SAEventPresetPropertyLatitude = @"$latitude";
-static NSString * const SAEventPresetPropertyLongitude = @"$longitude";
+static NSString * const kSAEventPresetPropertyLatitude = @"$latitude";
+static NSString * const kSAEventPresetPropertyLongitude = @"$longitude";
+static NSString * const kSAEventPresetPropertyCoordinateSystem = @"$geo_coordinate_system";
+static NSString * const kSAAppleCoordinateSystem = @"WGS84";
 
 @interface SALocationManager() <CLLocationManagerDelegate>
 
@@ -41,21 +43,34 @@ static NSString * const SAEventPresetPropertyLongitude = @"$longitude";
 
 @implementation SALocationManager
 
-- (instancetype)init {
-    if (self = [super init]) {
-        //默认设置设置精度为 100 ,也就是 100 米定位一次 ；准确性 kCLLocationAccuracyHundredMeters
-        _locationManager = [[CLLocationManager alloc] init];
-        _locationManager.delegate = self;
-        _locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
-        _locationManager.distanceFilter = 100.0;
++ (instancetype)defaultManager {
+    static dispatch_once_t onceToken;
+    static SALocationManager *manager = nil;
+    dispatch_once(&onceToken, ^{
+        manager = [[SALocationManager alloc] init];
+    });
+    return manager;
+}
 
-        _isUpdatingLocation = NO;
-
-        _coordinate = kCLLocationCoordinate2DInvalid;
-
-        [self setupListeners];
+- (void)setup {
+    if (_locationManager) {
+        return;
     }
-    return self;
+    //默认设置设置精度为 100 ,也就是 100 米定位一次 ；准确性 kCLLocationAccuracyHundredMeters
+    _locationManager = [[CLLocationManager alloc] init];
+    _locationManager.delegate = self;
+    _locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
+    _locationManager.distanceFilter = 100.0;
+
+    _isUpdatingLocation = NO;
+
+    _coordinate = kCLLocationCoordinate2DInvalid;
+    [self setupListeners];
+}
+
+- (void)setConfigOptions:(SAConfigOptions *)configOptions {
+    _configOptions = configOptions;
+    self.enable = configOptions.enableLocation;
 }
 
 - (void)dealloc {
@@ -66,8 +81,8 @@ static NSString * const SAEventPresetPropertyLongitude = @"$longitude";
 
 - (void)setEnable:(BOOL)enable {
     _enable = enable;
-
     if (enable) {
+        [self setup];
         [self startUpdatingLocation];
     } else {
         [self stopUpdatingLocation];
@@ -80,7 +95,7 @@ static NSString * const SAEventPresetPropertyLongitude = @"$longitude";
     }
     NSInteger latitude = self.coordinate.latitude * pow(10, 6);
     NSInteger longitude = self.coordinate.longitude * pow(10, 6);
-    return @{SAEventPresetPropertyLatitude: @(latitude), SAEventPresetPropertyLongitude: @(longitude)};
+    return @{kSAEventPresetPropertyLatitude: @(latitude), kSAEventPresetPropertyLongitude: @(longitude), kSAEventPresetPropertyCoordinateSystem: kSAAppleCoordinateSystem};
 }
 
 #pragma mark - Listener
@@ -128,9 +143,8 @@ static NSString * const SAEventPresetPropertyLongitude = @"$longitude";
             SALogWarn(@"设备尚未打开定位服务");
             return;
         }
-        if (@available(iOS 8.0, *)) {
-            [self.locationManager requestWhenInUseAuthorization];
-        }
+
+        [self.locationManager requestWhenInUseAuthorization];
         [self.locationManager startUpdatingLocation];
         self.isUpdatingLocation = YES;
     } @catch (NSException *e) {

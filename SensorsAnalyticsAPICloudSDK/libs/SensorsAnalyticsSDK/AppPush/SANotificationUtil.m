@@ -3,7 +3,7 @@
 // SensorsAnalyticsSDK
 //
 // Created by 陈玉国 on 2021/1/18.
-// Copyright © 2021 Sensors Data Co., Ltd. All rights reserved.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@
 
 #import "SANotificationUtil.h"
 #import "SAAppPushConstants.h"
+#import "SAJSONUtil.h"
 #import "SALog.h"
 
 @implementation SANotificationUtil
@@ -44,20 +45,10 @@
     NSString *sfDataString = userInfo[kSAPushServiceKeySF];
     
     if ([sfDataString isKindOfClass:[NSString class]]) {
-        NSData *sfData = [userInfo[kSAPushServiceKeySF] dataUsingEncoding:NSUTF8StringEncoding];
-        NSError *error;
-        NSDictionary *sfProperties;
-        if (sfData) {
-            @try {
-                sfProperties = [NSJSONSerialization JSONObjectWithData:sfData options:0 error:&error];
-            } @catch (NSException *exception) {
-                SALogError(@"%@", exception);
-            } @finally {
-                if (!error && [sfProperties isKindOfClass:[NSDictionary class]]) {
-                    [properties addEntriesFromDictionary:[self propertiesFromSFData:sfProperties]];
-                }
-            }
-            
+
+        NSDictionary *sfProperties = [SAJSONUtil JSONObjectWithString:sfDataString];
+        if ([sfProperties isKindOfClass:[NSDictionary class]]) {
+            [properties addEntriesFromDictionary:[self propertiesFromSFData:sfProperties]];
         }
     }
     

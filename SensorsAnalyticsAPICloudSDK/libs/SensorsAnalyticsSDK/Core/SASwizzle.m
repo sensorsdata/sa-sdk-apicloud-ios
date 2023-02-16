@@ -1,20 +1,20 @@
-//  SASwizzler.h
-//  SensorsAnalyticsSDK
+// SASwizzler.h
+// SensorsAnalyticsSDK
 //
-//  Created by 雨晗 on 1/20/16
-//  Copyright © 2015-2020 Sensors Data Co., Ltd. All rights reserved.
+// Created by 雨晗 on 1/20/16
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 //
 
 #if ! __has_feature(objc_arc)
@@ -24,7 +24,7 @@
 
 #import "SASwizzle.h"
 
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IOS
 	#import <objc/runtime.h>
 	#import <objc/message.h>
 #else
@@ -51,21 +51,13 @@
 + (BOOL)sa_swizzleMethod:(SEL)origSel_  withClass:(Class)altCla_ withMethod:(SEL)altSel_ error:(NSError **)error_ {
     Method origMethod = class_getInstanceMethod(self, origSel_);
     if (!origMethod) {
-#if TARGET_OS_IPHONE
         SetNSError(error_, @"original method %@ not found for class %@", NSStringFromSelector(origSel_), [self class]);
-#else
-        SetNSError(error_, @"original method %@ not found for class %@", NSStringFromSelector(origSel_), [self className]);
-#endif
         return NO;
     }
 
     Method altMethod = class_getInstanceMethod(altCla_, altSel_);
     if (!altMethod) {
-#if TARGET_OS_IPHONE
         SetNSError(error_, @"alternate method %@ not found for class %@", NSStringFromSelector(altSel_), [altCla_ class]);
-#else
-        SetNSError(error_, @"alternate method %@ not found for class %@", NSStringFromSelector(altSel_), [altCla_ className]);
-#endif
         return NO;
     }
 
@@ -93,21 +85,13 @@
 #if OBJC_API_VERSION >= 2
 	Method origMethod = class_getInstanceMethod(self, origSel_);
 	if (!origMethod) {
-#if TARGET_OS_IPHONE
 		SetNSError(error_, @"original method %@ not found for class %@", NSStringFromSelector(origSel_), [self class]);
-#else
-		SetNSError(error_, @"original method %@ not found for class %@", NSStringFromSelector(origSel_), [self className]);
-#endif
 		return NO;
 	}
 	
 	Method altMethod = class_getInstanceMethod(self, altSel_);
 	if (!altMethod) {
-#if TARGET_OS_IPHONE
 		SetNSError(error_, @"alternate method %@ not found for class %@", NSStringFromSelector(altSel_), [self class]);
-#else
-		SetNSError(error_, @"alternate method %@ not found for class %@", NSStringFromSelector(altSel_), [self className]);
-#endif
 		return NO;
 	}
 	

@@ -54,12 +54,6 @@
                 "use_kvc": false
             },
             {
-                "name": "sensorsdata_elementSelector",
-                "key": "element_selector",
-                "type": "NSString",
-                "use_kvc": false
-            },
-            {
               "name": "sensorsdata_elementPosition",
               "key": "element_position",
               "type": "NSString",
@@ -102,11 +96,17 @@
               "key": "is_h5",
               "type": "BOOL",
               "use_kvc": false
+            },
+            {
+              "name": "sensorsdata_isListView",
+              "key": "is_list_view",
+              "type": "BOOL",
+              "use_kvc": false
             }
           ]
         },
         {
-          "name": "SAJSTouchEventView",
+          "name": "SAWebElementView",
           "superclass": "UIView",
           "properties": [
               {
@@ -117,6 +117,16 @@
                 "name": "title",
                 "key": "h5_title",
                 "type": "NSString"
+              },
+              {
+                  "name": "tagName",
+                  "key": "tag_name",
+                  "type": "NSString"
+              },
+              {
+                  "name": "listSelector",
+                  "key": "list_selector",
+                  "type": "NSString"
               },
               {
                   "name": "sensorsdata_elementSelector",

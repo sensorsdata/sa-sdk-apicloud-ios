@@ -3,7 +3,7 @@
 // SensorsAnalyticsSDK
 //
 // Created by yuqiang on 2020/11/5.
-// Copyright © 2020 Sensors Data Co., Ltd. All rights reserved.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,24 +50,10 @@
 }
 
 + (BOOL)setObject:(id)object toClass:(Class)cla {
-    if (cla && object) {
+    if (cla && object && object_getClass(object) != cla) {
         return object_setClass(object, cla);
     }
     return NO;
-}
-
-+ (void)disposeClass:(Class)cla {
-    if (cla) {
-        objc_disposeClassPair(cla);
-    }
-}
-
-+ (Class _Nullable)realClassWithObject:(id)object {
-    return object_getClass(object);
-}
-
-+ (Class _Nullable)realSuperClassWithClass:(Class _Nullable)cla {
-    return class_getSuperclass(cla);
 }
 
 @end

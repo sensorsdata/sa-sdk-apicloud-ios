@@ -3,7 +3,7 @@
 // SensorsAnalyticsSDK
 //
 // Created by 张敏超🍎 on 2020/6/18.
-// Copyright © 2020 Sensors Data Co., Ltd. All rights reserved.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ extern NSUInteger const SAEventFlushRecordSize;
 - (void)trackEvent:(NSDictionary *)event isSignUp:(BOOL)isSignUp;
 
 - (void)flushAllEventRecords;
+- (void)flushAllEventRecordsWithCompletion:(void(^ _Nullable)(void))completion;
 
 @end
 

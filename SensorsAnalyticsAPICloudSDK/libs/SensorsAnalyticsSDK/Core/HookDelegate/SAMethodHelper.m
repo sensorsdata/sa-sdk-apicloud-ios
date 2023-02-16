@@ -1,21 +1,21 @@
 //
-//  SAMethodHelper.m
-//  SensorsAnalyticsSDK
+// SAMethodHelper.m
+// SensorsAnalyticsSDK
 //
-//  Created by 张敏超🍎 on 2019/6/19.
-//  Copyright © 2019 SensorsData. All rights reserved.
+// Created by 张敏超🍎 on 2019/6/19.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 //
 
 #if ! __has_feature(objc_arc)
@@ -25,6 +25,8 @@
 #import "SAMethodHelper.h"
 #import <objc/runtime.h>
 #import "SALog.h"
+#import "SASwizzle.h"
+#import "NSObject+SADelegateProxy.h"
 
 @implementation SAMethodHelper
 
@@ -51,6 +53,11 @@
     const char *types = method_getTypeEncoding(method);
     // 在 toClass 中，添加一个名为 destinationSelector 的方法
     if (!class_addMethod(toClass, destinationSelector, methodIMP, types)) {
+        IMP destinationIMP = [self implementationOfMethodSelector:destinationSelector fromClass:toClass];
+        if (destinationIMP == methodIMP) {
+            return;
+        }
+
         class_replaceMethod(toClass, destinationSelector, methodIMP, types);
     }
 }
@@ -69,6 +76,15 @@
     IMP methodIMP = method_getImplementation(method);
     const char *types = method_getTypeEncoding(method);
     return class_replaceMethod(toClass, destinationSelector, methodIMP, types);
+}
+
++ (void)swizzleRespondsToSelector {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        [NSObject sa_swizzleMethod:@selector(respondsToSelector:)
+                        withMethod:@selector(sensorsdata_respondsToSelector:)
+                             error:NULL];
+    });
 }
 
 @end

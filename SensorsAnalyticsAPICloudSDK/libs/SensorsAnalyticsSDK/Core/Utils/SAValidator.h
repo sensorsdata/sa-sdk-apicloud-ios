@@ -3,7 +3,7 @@
 // SensorsAnalyticsSDK
 //
 // Created by wenquan on 2020/2/19.
-// Copyright © 2020 Sensors Data Co., Ltd. All rights reserved.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,6 +22,21 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+#define SAPropertyError(errorCode, fromat, ...) \
+    [NSError errorWithDomain:@"SensorsAnalyticsErrorDomain" \
+                        code:errorCode \
+                    userInfo:@{NSLocalizedDescriptionKey:[NSString stringWithFormat:fromat,##__VA_ARGS__]}] \
+
+
+typedef NS_ENUM(NSUInteger, SAValidatorError) {
+    SAValidatorErrorNil = 20001,
+    SAValidatorErrorNotString,
+    SAValidatorErrorEmpty,
+    SAValidatorErrorRegexInit,
+    SAValidatorErrorInvalid,
+    SAValidatorErrorOverflow,
+};
+
 @interface SAValidator : NSObject
 
 + (BOOL)isValidString:(NSString *)string;
@@ -31,6 +46,12 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)isValidArray:(NSArray *)array;
 
 + (BOOL)isValidData:(NSData *)data;
+
+/// 校验事件名或参数名是否有效
++ (void)validKey:(NSString *)key error:(NSError *__autoreleasing  _Nullable * _Nullable)error;
+
+//保留字校验
++ (void)reservedKeywordCheckForObject:(NSString *)object error:(NSError *__autoreleasing  _Nullable * _Nullable)error;
 
 @end
 

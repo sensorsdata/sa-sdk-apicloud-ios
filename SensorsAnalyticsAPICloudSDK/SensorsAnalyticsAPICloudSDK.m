@@ -15,22 +15,17 @@
 #import "NSDictionaryUtils.h"
 #import "SensorsAnalyticsSDK.h"
 
-static NSString * const kSAAPICloudPluginVersion = @"apicloud:2.0.0";
+static NSString * const kSAAPICloudPluginVersion = @"apicloud:2.2.0";
 static NSString * const kSAAPICloudPluginVersionKey = @"$lib_plugin_version";
 static NSString * const kSAAPICloudAppInstall = @"AppInstall";
 
 static NSString * const kSAAPICloudSDK = @"sensorsAnalyticsAPICloudSDK";
-static NSString * const kSAAPICloudConfigServerURL = @"serverURL";
-static NSString * const kSAAPICloudConfigEnableLog = @"enableLog";
-static NSString * const kSAAPICloudConfigEnableAutoTrack = @"enableAutoTrack";
-static NSString * const kSAAPICloudConfigDownloadChannel = @"downloadChannel";
-static NSString * const kSAAPICloudConfigFlushInterval = @"flushInterval";
-static NSString * const kSAAPICloudConfigFlushBulkSize = @"flushBulkSize";
-static NSString * const kSAAPICloudConfigMaxCacheSize = @"maxCacheSizeIOS";
-static NSString * const kSAAPICloudConfigMinRequestInterval = @"minRequestInterval";
-static NSString * const kSAAPICloudConfigMaxRequestInterval = @"maxRequestInterval";
-static NSString * const kSAAPICloudConfigDisableRandomTimeRequest = @"disableRandomTimeRequestRemoteConfig";
-static NSString * const kSAAPICloudConfigDisableEncrypt = @"encrypt";
+static NSString * const kSAAPICloudConfigServerURL = @"server_url";
+static NSString * const kSAAPICloudConfigEnableLog = @"enable_log";
+static NSString * const kSAAPICloudConfigEnableAutoTrack = @"auto_track";
+static NSString * const kSAAPICloudConfigFlushInterval = @"flush_interval";
+static NSString * const kSAAPICloudConfigFlushBulkSize = @"flush_bulkSize";
+static NSString * const kSAAPICloudConfigEnableEncrypt = @"encrypt";
 
 @implementation SensorsAnalyticsAPICloudSDK
 
@@ -67,36 +62,28 @@ static NSString * const kSAAPICloudConfigDisableEncrypt = @"encrypt";
 }
 
 + (void)onAppLaunch:(NSDictionary *)launchOptions {
-    [self performSelectorWithImplementation:^{
-        NSDictionary *feature = [UZAppDelegate.appDelegate getFeatureByName:kSAAPICloudSDK];
-        NSString *serverURL = [feature stringValueForKey:kSAAPICloudConfigServerURL defaultValue:nil];
-        BOOL enableLog = [feature boolValueForKey:kSAAPICloudConfigEnableLog defaultValue:NO];
-        BOOL enableAutoTrack = [feature boolValueForKey:kSAAPICloudConfigEnableAutoTrack defaultValue:NO];
-        NSString *downloadChannel = [feature stringValueForKey:kSAAPICloudConfigDownloadChannel defaultValue:nil];
-        NSInteger flushInterval = [feature integerValueForKey:kSAAPICloudConfigFlushInterval defaultValue:15];
-        NSInteger flushBulkSize = [feature integerValueForKey:kSAAPICloudConfigFlushBulkSize defaultValue:100];
-        NSInteger maxCacheSize = [feature integerValueForKey:kSAAPICloudConfigMaxCacheSize defaultValue:10000];
-        NSInteger minRequestInterval = [feature integerValueForKey:kSAAPICloudConfigMinRequestInterval defaultValue:0];
-        NSInteger maxRequestInterval = [feature integerValueForKey:kSAAPICloudConfigMaxRequestInterval defaultValue:0];
-        BOOL disableRandomTimeRequest = [feature boolValueForKey:kSAAPICloudConfigDisableRandomTimeRequest defaultValue:NO];
-        BOOL encrypt = [feature boolValueForKey:kSAAPICloudConfigDisableEncrypt defaultValue:NO];
+}
 
-        SAConfigOptions *config = [[SAConfigOptions alloc] initWithServerURL:serverURL launchOptions:launchOptions];
-        config.flushInterval = flushInterval;
-        config.flushBulkSize = flushBulkSize;
-        config.maxCacheSize = maxCacheSize;
-        config.minRequestHourInterval = minRequestInterval;
-        config.maxRequestHourInterval = maxRequestInterval;
-        config.disableRandomTimeRequestRemoteConfig = disableRandomTimeRequest;
-        config.enableEncrypt = encrypt;
-        config.enableLog = enableLog;
-        if (enableAutoTrack) {
-            config.autoTrackEventType = SensorsAnalyticsEventTypeAppStart|SensorsAnalyticsEventTypeAppEnd;
+JS_METHOD(initSDK:(UZModuleMethodContext *)context) {
+    [self performSelectorWithImplementation:^{
+        SAConfigOptions *options = [[SAConfigOptions alloc] initWithServerURL:@"" launchOptions:nil];
+        NSDictionary *config = context.param;
+        if (![config isKindOfClass:[NSDictionary class]] || config.allKeys.count == 0) {
+            [SensorsAnalyticsSDK startWithConfigOptions:options];
+            return;
         }
-        [SensorsAnalyticsSDK startWithConfigOptions:config];
-        if (downloadChannel.length > 0) {
-            [SensorsAnalyticsSDK.sharedInstance trackInstallation:kSAAPICloudAppInstall withProperties:@{@"downloadChannel":downloadChannel}];
+        NSString *serverUrl = [config stringValueForKey:kSAAPICloudConfigServerURL defaultValue:@""];
+        options = [[SAConfigOptions alloc] initWithServerURL:serverUrl launchOptions:nil];
+        BOOL enableLog = [config boolValueForKey:kSAAPICloudConfigEnableLog defaultValue:NO];
+        options.enableLog = enableLog;
+        BOOL autoTrack = [config boolValueForKey:kSAAPICloudConfigEnableAutoTrack defaultValue:NO];
+        if (autoTrack) {
+            options.autoTrackEventType = SensorsAnalyticsEventTypeAppStart | SensorsAnalyticsEventTypeAppEnd;
         }
+        options.flushInterval = [config integerValueForKey:kSAAPICloudConfigFlushInterval defaultValue:15 * 1000];
+        options.flushBulkSize = [config integerValueForKey:kSAAPICloudConfigFlushBulkSize defaultValue:100];
+        options.enableEncrypt = [config boolValueForKey:kSAAPICloudConfigEnableEncrypt defaultValue:NO];
+        [SensorsAnalyticsSDK startWithConfigOptions:options];
     }];
 }
 
@@ -586,15 +573,17 @@ JS_METHOD(deleteAll:(UZModuleMethodContext *)context) {
  *
  * 例如：
  * var param = {
- *     serverUrl:serverUrl
+ *     serverUrl: serverUrl,
+ *     requestRemoteConfig: true
  * }
  */
 JS_METHOD(setServerUrl:(UZModuleMethodContext *)context) {
     [self performSelectorWithImplementation:^{
         NSDictionary *param = context.param;
         NSString *serverUrl = [param stringValueForKey:@"serverUrl" defaultValue:nil];
+        BOOL isRequestRemoteConfig = [param boolValueForKey:@"requestRemoteConfig" defaultValue:false];
         if (serverUrl.length > 0) {
-            [SensorsAnalyticsSDK.sharedInstance setServerUrl:serverUrl];
+            [SensorsAnalyticsSDK.sharedInstance setServerUrl:serverUrl isRequestRemoteConfig:isRequestRemoteConfig];
         }
     }];
 }
@@ -663,7 +652,10 @@ JS_METHOD(setFlushNetworkPolicy:(UZModuleMethodContext *)context) {
 #endif
             SensorsAnalyticsNetworkTypeWIFI;
         NSInteger policy = [param integerValueForKey:@"networkPolicy" defaultValue:defaultValue];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         [[SensorsAnalyticsSDK sharedInstance] setFlushNetworkPolicy:policy];
+#pragma clang diagnostic pop
     }];
 }
 
@@ -683,7 +675,7 @@ JS_METHOD(setFlushInterval:(UZModuleMethodContext *)context) {
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [self performSelectorWithImplementation:^{
         NSDictionary *param = context.param;
-        long long flushInterval = [param longlongValueForKey:@"flushInterval" defaultValue:0];
+        NSInteger flushInterval = [param integerValueForKey:@"flushInterval" defaultValue:0];
         [[SensorsAnalyticsSDK sharedInstance] setFlushInterval:flushInterval];
     }];
 #pragma clang diagnostic pop
@@ -705,7 +697,7 @@ JS_METHOD(setFlushBulkSize:(UZModuleMethodContext *)context) {
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [self performSelectorWithImplementation:^{
         NSDictionary *param = context.param;
-        long long flushBulkSize = [param longlongValueForKey:@"flushBulkSize" defaultValue:0];
+        NSInteger flushBulkSize = [param integerValueForKey:@"flushBulkSize" defaultValue:0];
         [[SensorsAnalyticsSDK sharedInstance] setFlushBulkSize:flushBulkSize];
     }];
 #pragma clang diagnostic pop
@@ -893,6 +885,171 @@ JS_METHOD_SYNC(getSessionIntervalTime:(UZModuleMethodContext *)context) {
 }
 
 JS_METHOD(enableDataCollect:(UZModuleMethodContext *)context) {
+}
+
+/**
+ * @abstract
+ * 禁用 SDK。调用后，SDK 将不采集事件，不发送网络请求
+ *
+ * @param context 无参数
+ */
+JS_METHOD(disableSDK:(UZModuleMethodContext *)context) {
+    [self performSelectorWithImplementation:^{
+        [SensorsAnalyticsSDK disableSDK];
+    }];
+}
+
+/**
+ * @abstract
+ * 开启 SDK。如果之前 SDK 是禁止状态，调用后将恢复数据采集功能
+ *
+ * @param context 无参数
+ */
+JS_METHOD(enableSDK:(UZModuleMethodContext *)context) {
+    [self performSelectorWithImplementation:^{
+        [SensorsAnalyticsSDK enableSDK];
+    }];
+}
+
+/**
+ * @abstract
+ * 获取当前数据接收地址
+ *
+ * @param context 无参数
+ * @return 数据接收地址
+ */
+JS_METHOD_SYNC(getServerUrl:(UZModuleMethodContext *)context) {
+    __block NSString *url = nil;
+    [self performSelectorWithImplementation:^{
+        url = [SensorsAnalyticsSDK.sharedInstance serverUrl];
+    }];
+    return url;
+}
+
+/**
+ * @abstract
+ * ID-Mapping 3.0 登录，设置当前用户的 loginIDKey 和 loginId
+
+ * ⚠️ 此接口为 ID-Mapping 3.0 特殊场景下特定接口，请咨询确认后再使用
+
+ * @param context key: 当前用户的登录 ID key; id: 当前用户的登录 ID
+ *
+ * 例如：
+ * var param = {
+ *      key: login_id,
+ *      id: user123
+ * }
+ */
+JS_METHOD(loginWithKey:(UZModuleMethodContext *)context) {
+    [self performSelectorWithImplementation:^{
+        NSDictionary *param = context.param;
+        NSString *loginKey = [param stringValueForKey:@"key" defaultValue:nil];
+        NSString *loginId = [param stringValueForKey:@"id" defaultValue:nil];
+        [SensorsAnalyticsSDK.sharedInstance loginWithKey:loginKey loginId:loginId];
+    }];
+}
+
+/**
+ * @abstract
+ * ID-Mapping 3.0 功能下已绑定的业务 ID 列表
+ *
+ * @param context 无参数
+ * @return 业务 ID 列表
+ */
+JS_METHOD_SYNC(getIdentities:(UZModuleMethodContext *)context) {
+    __block NSDictionary *properties = nil;
+    [self performSelectorWithImplementation:^{
+        properties = [SensorsAnalyticsSDK.sharedInstance identities];
+    }];
+    return properties;
+}
+
+/**
+ * @abstract
+ * ID-Mapping 3.0 功能下绑定业务 ID 功能
+ *
+ * @param context key: 绑定业务 ID 的键名; vale: 绑定业务 ID 的键值
+ *
+ * 例如：
+ * var param = {
+ *      key: email,
+ *      value: 123@abc.com
+ * }
+ */
+JS_METHOD(bind:(UZModuleMethodContext *)context) {
+    [self performSelectorWithImplementation:^{
+        NSDictionary *param = context.param;
+        NSString *key = [param stringValueForKey:@"key" defaultValue:nil];
+        NSString *value = [param stringValueForKey:@"value" defaultValue:nil];
+        [SensorsAnalyticsSDK.sharedInstance bind:key value:value];
+    }];
+}
+
+/**
+ * @abstract
+ * ID-Mapping 3.0 功能下解绑业务 ID 功能
+ *
+ * @param context key: 解绑业务 ID 的键名; vale: 解绑业务 ID 的键值
+ *
+ * 例如：
+ * var param = {
+ *      key: email,
+ *      value: 123@abc.com
+ * }
+ */
+JS_METHOD(unbind:(UZModuleMethodContext *)context) {
+    [self performSelectorWithImplementation:^{
+        NSDictionary *param = context.param;
+        NSString *key = [param stringValueForKey:@"key" defaultValue:nil];
+        NSString *value = [param stringValueForKey:@"value" defaultValue:nil];
+        [SensorsAnalyticsSDK.sharedInstance unbind:key value:value];
+    }];
+}
+
+/**
+ * @abstract
+ * 获取匿名 id
+ *
+ * @param context 无参数
+ * @return 匿名 id
+ */
+JS_METHOD_SYNC(getAnonymousId:(UZModuleMethodContext *)context) {
+    __block NSString *anonymousId = nil;
+    [self performSelectorWithImplementation:^{
+        anonymousId = [SensorsAnalyticsSDK.sharedInstance anonymousId];
+    }];
+    return anonymousId;
+}
+
+/**
+ * @abstract
+ * 重置默认匿名 id
+ *
+ * @param context 无参数
+ */
+JS_METHOD(resetAnonymousId:(UZModuleMethodContext *)context) {
+    [self performSelectorWithImplementation:^{
+        [SensorsAnalyticsSDK.sharedInstance resetAnonymousId];
+    }];
+}
+
+/**
+ * @abstract
+ * 删除事件计时
+ *
+ * @param context eventName: 事件名称或事件的 eventId
+ *
+ * 例如：
+ * var param = {
+ *      eventName: BuyProduct
+ * }
+ */
+JS_METHOD(removeTimer:(UZModuleMethodContext *)context) {
+    [self performSelectorWithImplementation:^{
+        NSDictionary *param = context.param;
+        NSString *eventName = [param stringValueForKey:@"event" defaultValue:nil];
+        [SensorsAnalyticsSDK.sharedInstance removeTimer:eventName];
+    }];
 }
 
 @end

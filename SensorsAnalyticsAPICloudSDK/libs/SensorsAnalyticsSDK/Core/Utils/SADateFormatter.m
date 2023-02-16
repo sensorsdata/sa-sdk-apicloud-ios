@@ -3,7 +3,7 @@
 // SensorsAnalyticsSDK
 //
 // Created by 彭远洋 on 2019/12/23.
-// Copyright © 2019 SensorsData. All rights reserved.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@
 
 #import "SADateFormatter.h"
 
+NSString * const kSAEventDateFormatter = @"yyyy-MM-dd HH:mm:ss.SSS";
+
 @implementation SADateFormatter
 
 + (NSDateFormatter *)dateFormatterFromString:(NSString *)string {
@@ -31,6 +33,7 @@
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         dateFormatter = [[NSDateFormatter alloc] init];
+        dateFormatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
     });
     if (dateFormatter) {
         [dateFormatter setDateFormat:string];

@@ -3,7 +3,7 @@
 // SensorsAnalyticsSDK
 //
 // Created by yuqiang on 2020/11/5.
-// Copyright © 2020 Sensors Data Co., Ltd. All rights reserved.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,19 +37,6 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param object 实例对象
 /// @param cla 要变更的目标类
 + (BOOL)setObject:(id)object toClass:(Class)cla;
-
-/// 释放类
-/// @param cla 待释放的类
-+ (void)disposeClass:(Class)cla;
-
-/// 获取实例对象的 isa
-/// 当类重写了 - (Class)class 方法后, 通过 object.class 方式可能获取不准确
-/// @param object 实例对象
-+ (Class _Nullable)realClassWithObject:(id)object;
-
-/// 获取 Class 的父类
-/// @param cla 类
-+ (Class _Nullable)realSuperClassWithClass:(Class _Nullable)cla;
 
 @end
 

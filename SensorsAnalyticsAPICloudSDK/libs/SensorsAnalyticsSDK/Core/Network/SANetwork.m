@@ -1,21 +1,21 @@
 //
-//  SANetwork.m
-//  SensorsAnalyticsSDK
+// SANetwork.m
+// SensorsAnalyticsSDK
 //
-//  Created by 张敏超 on 2019/3/8.
-//  Copyright © 2015-2020 Sensors Data Co., Ltd. All rights reserved.
+// Created by 张敏超 on 2019/3/8.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 //
 
 #if ! __has_feature(objc_arc)
@@ -27,13 +27,16 @@
 #import "SAModuleManager.h"
 #import "SensorsAnalyticsSDK+Private.h"
 #import "SensorsAnalyticsSDK.h"
-#import "NSString+HashCode.h"
+#import "NSString+SAHashCode.h"
 #import "SAGzipUtility.h"
 #import "SALog.h"
 #import "SAJSONUtil.h"
 #import "SAHTTPSession.h"
 #import "SAReachability.h"
+
+#if TARGET_OS_IOS && !TARGET_OS_MACCATALYST
 #import <CoreTelephony/CTTelephonyNetworkInfo.h>
+#endif
 
 @interface SANetwork ()
 
@@ -138,7 +141,35 @@
         return SensorsAnalyticsNetworkTypeNONE;
     } else if ([@"WIFI" isEqualToString:networkTypeString]) {
         return SensorsAnalyticsNetworkTypeWIFI;
-    } else if ([@"2G" isEqualToString:networkTypeString]) {
+    }
+
+    SensorsAnalyticsNetworkType networkType = SensorsAnalyticsNetworkTypeNONE;
+#if TARGET_OS_IOS && !TARGET_OS_MACCATALYST
+    networkType = [self networkTypeWWANOptionsWithString:networkTypeString];
+#endif
+    return networkType;
+}
+
++ (NSString *)networkTypeString {
+    NSString *networkTypeString = @"NULL";
+    @try {
+        if ([SAReachability sharedInstance].isReachableViaWiFi) {
+            networkTypeString = @"WIFI";
+        }
+#if TARGET_OS_IOS && !TARGET_OS_MACCATALYST
+        else {
+            networkTypeString = [self networkTypeWWANString];
+        }
+#endif
+    } @catch (NSException *exception) {
+        SALogError(@"%@: %@", self, exception);
+    }
+    return networkTypeString;
+}
+
+#if TARGET_OS_IOS && !TARGET_OS_MACCATALYST
++ (SensorsAnalyticsNetworkType)networkTypeWWANOptionsWithString:(NSString *)networkTypeString {
+    if ([@"2G" isEqualToString:networkTypeString]) {
         return SensorsAnalyticsNetworkType2G;
     } else if ([@"3G" isEqualToString:networkTypeString]) {
         return SensorsAnalyticsNetworkType3G;
@@ -154,37 +185,29 @@
     return SensorsAnalyticsNetworkTypeNONE;
 }
 
-+ (NSString *)networkTypeString {
-    @try {
-        if ([SAReachability sharedInstance].isReachableViaWiFi) {
-            return @"WIFI";
-        }
-
-        if ([SAReachability sharedInstance].isReachableViaWWAN) {
-            static CTTelephonyNetworkInfo *networkInfo = nil;
-            static dispatch_once_t onceToken;
-            dispatch_once(&onceToken, ^{
-                networkInfo = [[CTTelephonyNetworkInfo alloc] init];
-            });
-
-            NSString *currentRadioAccessTechnology = nil;
-#ifdef __IPHONE_12_0
-            if (@available(iOS 12.1, *)) {
-                currentRadioAccessTechnology = networkInfo.serviceCurrentRadioAccessTechnology.allValues.lastObject;
-            }
-#endif
-            // 测试发现存在少数 12.0 和 12.0.1 的机型 serviceCurrentRadioAccessTechnology 返回空
-            if (!currentRadioAccessTechnology) {
-                currentRadioAccessTechnology = networkInfo.currentRadioAccessTechnology;
-            }
-
-            return [SANetwork networkStatusWithRadioAccessTechnology:currentRadioAccessTechnology];
-        }
-    } @catch (NSException *exception) {
-        SALogError(@"%@: %@", self, exception);
++ (NSString *)networkTypeWWANString {
+    if (![SAReachability sharedInstance].isReachableViaWWAN) {
+        return @"NULL";
     }
 
-    return @"NULL";
+    static CTTelephonyNetworkInfo *networkInfo = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        networkInfo = [[CTTelephonyNetworkInfo alloc] init];
+    });
+
+    NSString *currentRadioAccessTechnology = nil;
+#ifdef __IPHONE_12_0
+    if (@available(iOS 12.1, *)) {
+        currentRadioAccessTechnology = networkInfo.serviceCurrentRadioAccessTechnology.allValues.lastObject;
+    }
+#endif
+    // 测试发现存在少数 12.0 和 12.0.1 的机型 serviceCurrentRadioAccessTechnology 返回空
+    if (!currentRadioAccessTechnology) {
+        currentRadioAccessTechnology = networkInfo.currentRadioAccessTechnology;
+    }
+
+    return [SANetwork networkStatusWithRadioAccessTechnology:currentRadioAccessTechnology];
 }
 
 + (NSString *)networkStatusWithRadioAccessTechnology:(NSString *)value {
@@ -205,6 +228,7 @@
     } else if ([value isEqualToString:CTRadioAccessTechnologyLTE]) {
         return @"4G";
     }
+
 #ifdef __IPHONE_14_1
     else if (@available(iOS 14.1, *)) {
         if ([value isEqualToString:CTRadioAccessTechnologyNRNSA] ||
@@ -216,5 +240,6 @@
 #endif
     return @"UNKNOWN";
 }
+#endif
 
 @end

@@ -3,7 +3,7 @@
 // SensorsAnalyticsSDK
 //
 // Created by wenquan on 2021/1/19.
-// Copyright © 2021 Sensors Data Co., Ltd. All rights reserved.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -66,13 +66,15 @@ static SAReachabilityStatus SAReachabilityStatusForFlags(SCNetworkReachabilityFl
             returnValue = SAReachabilityStatusViaWiFi;
         }
     }
-
+    
+#if TARGET_OS_IOS
     if ((flags & kSCNetworkReachabilityFlagsIsWWAN) == kSCNetworkReachabilityFlagsIsWWAN) {
         /*
          ... but WWAN connections are OK if the calling application is using the CFNetwork APIs.
          */
         returnValue = SAReachabilityStatusViaWWAN;
     }
+#endif
 
     return returnValue;
 }

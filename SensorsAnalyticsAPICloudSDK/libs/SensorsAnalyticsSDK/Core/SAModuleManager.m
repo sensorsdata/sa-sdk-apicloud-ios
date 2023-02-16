@@ -3,7 +3,7 @@
 // SensorsAnalyticsSDK
 //
 // Created by 张敏超🍎 on 2020/8/14.
-// Copyright © 2020 Sensors Data Co., Ltd. All rights reserved.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,45 +26,43 @@
 #import "SAModuleProtocol.h"
 #import "SAConfigOptions.h"
 #import "SensorsAnalyticsSDK+Private.h"
+#import "SAThreadSafeDictionary.h"
 
 // Location 模块名
 static NSString * const kSALocationModuleName = @"Location";
 static NSString * const kSADeviceOrientationModuleName = @"DeviceOrientation";
 static NSString * const kSADebugModeModuleName = @"DebugMode";
-static NSString * const kSAReactNativeModuleName = @"ReactNative";
 static NSString * const kSAChannelMatchModuleName = @"ChannelMatch";
+/// 可视化相关（可视化全埋点和点击图）
+static NSString * const kSAVisualizedModuleName = @"Visualized";
+
 static NSString * const kSAEncryptModuleName = @"Encrypt";
-static NSString * const kSADeeplinkModuleName = @"Deeplink";
+static NSString * const kSADeepLinkModuleName = @"DeepLink";
 static NSString * const kSANotificationModuleName = @"AppPush";
-static NSString * const kSAGestureModuleName = @"Gesture";
+static NSString * const kSAAutoTrackModuleName = @"AutoTrack";
+static NSString * const kSARemoteConfigModuleName = @"RemoteConfig";
+
+static NSString * const kSAJavaScriptBridgeModuleName = @"JavaScriptBridge";
+static NSString * const kSAExceptionModuleName = @"Exception";
 
 @interface SAModuleManager ()
 
-@property (atomic, strong) NSMutableDictionary<NSString *, id<SAModuleProtocol>> *modules;
+/// 已开启的模块
+@property (nonatomic, strong) NSArray<NSString *> *moduleNames;
+
 @property (nonatomic, strong) SAConfigOptions *configOptions;
 
 @end
 
 @implementation SAModuleManager
 
-+ (void)startWithConfigOptions:(SAConfigOptions *)configOptions debugMode:(SensorsAnalyticsDebugMode)debugMode {
++ (void)startWithConfigOptions:(SAConfigOptions *)configOptions {
     SAModuleManager.sharedInstance.configOptions = configOptions;
-
-    // 渠道联调诊断功能获取多渠道匹配开关
-    [SAModuleManager.sharedInstance setEnable:YES forModule:kSAChannelMatchModuleName];
-    // 初始化 LinkHandler 处理 deepLink 相关操作
-    [SAModuleManager.sharedInstance setEnable:YES forModule:kSADeeplinkModuleName];
-    // 初始化 Debug 模块
-    [SAModuleManager.sharedInstance setEnable:YES forModule:kSADebugModeModuleName];
-    [SAModuleManager.sharedInstance handleDebugMode:debugMode];
-    
-    // 加密
-    [SAModuleManager.sharedInstance setEnable:configOptions.enableEncrypt forModule:kSAEncryptModuleName];
-    
-    // 手势采集
-    if (NSClassFromString(@"SAGestureManager")) {
-        [SAModuleManager.sharedInstance setEnable:YES forModule:kSAGestureModuleName];
+    // 禁止 SDK 时，不开启其他模块
+    if (configOptions.disableSDK) {
+        return;
     }
+    [[SAModuleManager sharedInstance] loadModulesWithConfigOptions:configOptions];
 }
 
 + (instancetype)sharedInstance {
@@ -72,77 +70,121 @@ static NSString * const kSAGestureModuleName = @"Gesture";
     static SAModuleManager *manager = nil;
     dispatch_once(&onceToken, ^{
         manager = [[SAModuleManager alloc] init];
-        manager.modules = [NSMutableDictionary dictionary];
     });
     return manager;
 }
 
 #pragma mark - Private
-
-- (NSString *)moduleNameForType:(SAModuleType)type {
-    switch (type) {
-        case SAModuleTypeLocation:
-            return kSALocationModuleName;
-        case SAModuleTypeDeviceOrientation:
-            return kSADeviceOrientationModuleName;
-        case SAModuleTypeReactNative:
-            return kSAReactNativeModuleName;
-        case SAModuleTypeAppPush:
-            return kSANotificationModuleName;
-        default:
-            return nil;
-    }
-}
-
 - (NSString *)classNameForModule:(NSString *)moduleName {
     return [NSString stringWithFormat:@"SA%@Manager", moduleName];
 }
 
-- (void)setEnable:(BOOL)enable forModule:(NSString *)moduleName {
-    if (self.modules[moduleName]) {
-        self.modules[moduleName].enable = enable;
-    } else if (enable) {
-        NSString *className = [self classNameForModule:moduleName];
-        Class<SAModuleProtocol> cla = NSClassFromString(className);
-        NSAssert(cla, @"\n您使用接口开启了 %@ 模块，但是并没有集成该模块。\n • 如果使用源码集成神策分析 iOS SDK，请检查是否包含名为 %@ 的文件？\n • 如果使用 CocoaPods 集成 SDK，请修改 Podfile 文件，增加 %@ 模块的 subspec，例如：pod 'SensorsAnalyticsSDK', :subspecs => ['%@']。\n", moduleName, className, moduleName, moduleName);
-        if ([cla conformsToProtocol:@protocol(SAModuleProtocol)]) {
-            id<SAModuleProtocol> object = [[(Class)cla alloc] init];
-            if ([object respondsToSelector:@selector(setConfigOptions:)]) {
-                object.configOptions = self.configOptions;
-            }
-            object.enable = enable;
-            self.modules[moduleName] = object;
-        }
+- (id)moduleWithName:(NSString *)moduleName {
+    NSString *className = [self classNameForModule: moduleName];
+    Class moduleClass = NSClassFromString(className);
+    if (!moduleClass) {
+        return nil;
     }
+    SEL sharedManagerSEL = NSSelectorFromString(@"defaultManager");
+    if (![moduleClass respondsToSelector:sharedManagerSEL]) {
+        return nil;
+    }
+    id (*sharedManager)(id, SEL) = (id (*)(id, SEL))[moduleClass methodForSelector:sharedManagerSEL];
+
+    id module = sharedManager(moduleClass, sharedManagerSEL);
+    return module;
+}
+
+// module加载
+- (void)loadModulesWithConfigOptions:(SAConfigOptions *)configOptions {
+    [self loadModule:kSAJavaScriptBridgeModuleName withConfigOptions:configOptions];
+#if TARGET_OS_IOS
+    for (NSString *moduleName in self.moduleNames) {
+        if ([moduleName isEqualToString:kSAJavaScriptBridgeModuleName]) {
+            continue;
+        }
+        [self loadModule:moduleName withConfigOptions:configOptions];
+    }
+#endif
+}
+
+- (void)loadModule:(NSString *)moduleName withConfigOptions:(SAConfigOptions *)configOptions {
+    if (!moduleName) {
+        return;
+    }
+    id module = [self moduleWithName:moduleName];
+    if (!module) {
+        return;
+    }
+    if ([module conformsToProtocol:@protocol(SAModuleProtocol)] && [module respondsToSelector:@selector(setConfigOptions:)]) {
+        id<SAModuleProtocol>moduleObject = (id<SAModuleProtocol>)module;
+        moduleObject.configOptions = configOptions;
+    }
+}
+
+- (NSArray<NSString *> *)moduleNames {
+    return @[kSAJavaScriptBridgeModuleName, kSANotificationModuleName, kSAChannelMatchModuleName,
+             kSADeepLinkModuleName, kSADebugModeModuleName, kSALocationModuleName,
+             kSAAutoTrackModuleName, kSAVisualizedModuleName, kSAEncryptModuleName,
+             kSADeviceOrientationModuleName, kSAExceptionModuleName, kSARemoteConfigModuleName];
 }
 
 #pragma mark - Public
 
-- (BOOL)contains:(SAModuleType)type {
-    NSString *moduleName = [self moduleNameForType:type];
-    NSString *className = [self classNameForModule:moduleName];
-    return [NSClassFromString(className) conformsToProtocol:@protocol(SAModuleProtocol)];
+- (BOOL)isDisableSDK {
+    if (self.configOptions.disableSDK) {
+        return YES;
+    }
+    id module = [self moduleWithName:kSARemoteConfigModuleName];
+    if ([module conformsToProtocol:@protocol(SARemoteConfigModuleProtocol)] && [module conformsToProtocol:@protocol(SAModuleProtocol)]) {
+        id<SARemoteConfigModuleProtocol, SAModuleProtocol> manager = module;
+        return manager.isEnable ? manager.isDisableSDK : NO;
+    }
+    return NO;
 }
 
-- (id<SAModuleProtocol>)managerForModuleType:(SAModuleType)type {
-    NSString *name = [self moduleNameForType:type];
-    return self.modules[name];
+- (void)disableAllModules {
+    for (NSString *moduleName in self.moduleNames) {
+        id module = [self moduleWithName:moduleName];
+        if (!module) {
+            continue;
+        }
+        if ([module conformsToProtocol:@protocol(SAModuleProtocol)] && [module respondsToSelector:@selector(setEnable:)]) {
+            id<SAModuleProtocol>moduleObject = module;
+            moduleObject.enable = NO;
+        }
+    }
 }
 
-- (void)setEnable:(BOOL)enable forModuleType:(SAModuleType)type {
-    NSString *name = [self moduleNameForType:type];
-    [self setEnable:enable forModule:name];
+- (void)updateServerURL:(NSString *)serverURL {
+    for (NSString *moduleName in self.moduleNames) {
+        id module = [self moduleWithName:moduleName];
+        if (!module) {
+            continue;
+        }
+        if ([module conformsToProtocol:@protocol(SAModuleProtocol)] && [module respondsToSelector:@selector(isEnable)] && [module respondsToSelector:@selector(updateServerURL:)]) {
+            id<SAModuleProtocol>moduleObject = module;
+            moduleObject.isEnable ? [module updateServerURL:serverURL] : nil;
+        }
+    }
 }
 
 #pragma mark - Open URL
 
 - (BOOL)canHandleURL:(NSURL *)url {
-    for (id<SAModuleProtocol> obj in self.modules.allValues) {
-        if (![obj conformsToProtocol:@protocol(SAOpenURLProtocol)] || !obj.isEnable) {
+    for (NSString *moduleName in self.moduleNames) {
+        id module = [self moduleWithName:moduleName];
+        if (!module) {
             continue;
         }
-        id<SAOpenURLProtocol> manager = (id<SAOpenURLProtocol>)obj;
-        if ([manager canHandleURL:url]) {
+        if (![module conformsToProtocol:@protocol(SAOpenURLProtocol)]) {
+            continue;
+        }
+        if (![module respondsToSelector:@selector(canHandleURL:)]) {
+            continue;
+        }
+        id<SAOpenURLProtocol>moduleObject = module;
+        if ([moduleObject canHandleURL:url]) {
             return YES;
         }
     }
@@ -150,13 +192,20 @@ static NSString * const kSAGestureModuleName = @"Gesture";
 }
 
 - (BOOL)handleURL:(NSURL *)url {
-    for (id<SAModuleProtocol> obj in self.modules.allValues) {
-        if (![obj conformsToProtocol:@protocol(SAOpenURLProtocol)] || !obj.isEnable) {
+    for (NSString *moduleName in self.moduleNames) {
+        id module = [self moduleWithName:moduleName];
+        if (!module) {
             continue;
         }
-        id<SAOpenURLProtocol> manager = (id<SAOpenURLProtocol>)obj;
-        if ([manager canHandleURL:url]) {
-            return [manager handleURL:url];
+        if (![module conformsToProtocol:@protocol(SAOpenURLProtocol)]) {
+            continue;
+        }
+        if (![module respondsToSelector:@selector(canHandleURL:)] || ![module respondsToSelector:@selector(handleURL:)]) {
+            continue;
+        }
+        id<SAOpenURLProtocol>moduleObject = module;
+        if ([moduleObject canHandleURL:url]) {
+            return [moduleObject handleURL:url];
         }
     }
     return NO;
@@ -171,25 +220,37 @@ static NSString * const kSAGestureModuleName = @"Gesture";
 - (NSDictionary *)properties {
     NSMutableDictionary *properties = [NSMutableDictionary dictionary];
     // 兼容使用宏定义的方式源码集成 SDK
-    [self.modules enumerateKeysAndObjectsUsingBlock:^(NSString *key, id<SAModuleProtocol> obj, BOOL *stop) {
-        if (![obj conformsToProtocol:@protocol(SAPropertyModuleProtocol)] || !obj.isEnable) {
-            return;
+    for (NSString *moduleName in self.moduleNames) {
+        id module = [self moduleWithName:moduleName];
+        if (!module) {
+            continue;
         }
-        id<SAPropertyModuleProtocol> manager = (id<SAPropertyModuleProtocol>)obj;
+        if (![module conformsToProtocol:@protocol(SAPropertyModuleProtocol)] || ![module conformsToProtocol:@protocol(SAModuleProtocol)]) {
+            continue;
+        }
+        if (![module respondsToSelector:@selector(properties)] && [module respondsToSelector:@selector(isEnable)]) {
+            continue;
+        }
+        id<SAPropertyModuleProtocol, SAModuleProtocol>moduleObject = module;
+        if (!moduleObject.isEnable) {
+            continue;
+        }
 #ifndef SENSORS_ANALYTICS_DISABLE_TRACK_GPS
-        if ([key isEqualToString:kSALocationModuleName]) {
-            return [properties addEntriesFromDictionary:manager.properties];
+        if ([moduleName isEqualToString:kSALocationModuleName]) {
+            [properties addEntriesFromDictionary:moduleObject.properties];
+            continue;
         }
 #endif
 #ifndef SENSORS_ANALYTICS_DISABLE_TRACK_DEVICE_ORIENTATION
-        if ([key isEqualToString:kSADeviceOrientationModuleName]) {
-            return [properties addEntriesFromDictionary:manager.properties];
+        if ([moduleName isEqualToString:kSADeviceOrientationModuleName]) {
+            [properties addEntriesFromDictionary:moduleObject.properties];
+            continue;
         }
 #endif
-        if (manager.properties.count > 0) {
-            [properties addEntriesFromDictionary:manager.properties];
+        if (moduleObject.properties.count > 0) {
+            [properties addEntriesFromDictionary:moduleObject.properties];
         }
-    }];
+    }
     return properties;
 }
 
@@ -199,9 +260,17 @@ static NSString * const kSAGestureModuleName = @"Gesture";
 
 @implementation SAModuleManager (ChannelMatch)
 
-- (void)trackAppInstall:(NSString *)event properties:(NSDictionary *)properties disableCallback:(BOOL)disableCallback {
-    id<SAChannelMatchModuleProtocol> manager = (id<SAChannelMatchModuleProtocol>)self.modules[kSAChannelMatchModuleName];
-    [manager trackAppInstall:event properties:properties disableCallback:disableCallback];
+- (id<SAChannelMatchModuleProtocol>)channelMatchManager {
+    id module = [self moduleWithName:kSAChannelMatchModuleName];
+    if ([module conformsToProtocol:@protocol(SAChannelMatchModuleProtocol)] && [module conformsToProtocol:@protocol(SAModuleProtocol)]) {
+        id<SAChannelMatchModuleProtocol, SAModuleProtocol> manager = module;
+        return manager.isEnable ? manager : nil;
+    }
+    return nil;
+}
+
+- (NSDictionary *)channelInfoWithEvent:(NSString *)event {
+    return [self.channelMatchManager channelInfoWithEvent:event];
 }
 
 @end
@@ -211,7 +280,12 @@ static NSString * const kSAGestureModuleName = @"Gesture";
 @implementation SAModuleManager (DebugMode)
 
 - (id<SADebugModeModuleProtocol>)debugModeManager {
-    return (id<SADebugModeModuleProtocol>)self.modules[kSADebugModeModuleName];
+    id module = [self moduleWithName:kSADebugModeModuleName];
+    if ([module conformsToProtocol:@protocol(SADebugModeModuleProtocol)] && [module conformsToProtocol:@protocol(SAModuleProtocol)]) {
+        id<SADebugModeModuleProtocol, SAModuleProtocol> manager = module;
+        return manager.isEnable ? manager : nil;
+    }
+    return nil;
 }
 
 - (void)setDebugMode:(SensorsAnalyticsDebugMode)debugMode {
@@ -237,12 +311,15 @@ static NSString * const kSAGestureModuleName = @"Gesture";
 @end
 
 #pragma mark -
-
 @implementation SAModuleManager (Encrypt)
 
 - (id<SAEncryptModuleProtocol>)encryptManager {
-    id<SAEncryptModuleProtocol, SAModuleProtocol> manager = (id<SAEncryptModuleProtocol, SAModuleProtocol>)self.modules[kSAEncryptModuleName];
-    return manager.isEnable ? manager : nil;
+    id module = [self moduleWithName:kSAEncryptModuleName];
+    if ([module conformsToProtocol:@protocol(SAEncryptModuleProtocol)] && [module conformsToProtocol:@protocol(SAModuleProtocol)]) {
+        id<SAEncryptModuleProtocol, SAModuleProtocol> manager = module;
+        return manager.isEnable ? manager : nil;
+    }
+    return nil;
 }
 
 - (BOOL)hasSecretKey {
@@ -259,53 +336,135 @@ static NSString * const kSAGestureModuleName = @"Gesture";
 
 @end
 
-@implementation SAModuleManager (PushClick)
-
-- (void)setLaunchOptions:(NSDictionary *)launchOptions {
-    id<SAAppPushModuleProtocol> manager = (id<SAAppPushModuleProtocol>)[[SAModuleManager sharedInstance] managerForModuleType:SAModuleTypeAppPush];
-    [manager setLaunchOptions:launchOptions];
-}
-
-@end
-
 #pragma mark -
 
-@implementation SAModuleManager (Gesture)
+@implementation SAModuleManager (DeepLink)
 
-- (id<SAGestureModuleProtocol>)gestureManager {
-    id<SAGestureModuleProtocol, SAModuleProtocol> manager = (id<SAGestureModuleProtocol, SAModuleProtocol>)self.modules[kSAGestureModuleName];
-    return manager.isEnable ? manager : nil;
-}
-
-- (BOOL)isGestureVisualView:(id)obj {
-    return [self.gestureManager isGestureVisualView:obj];
-}
-
-@end
-
-#pragma mark -
-
-@implementation SAModuleManager (Deeplink)
-
-- (id<SADeeplinkModuleProtocol>)deeplinkManager {
-    id<SADeeplinkModuleProtocol> manager = (id<SADeeplinkModuleProtocol>)self.modules[kSADeeplinkModuleName];
-    return manager;
-}
-
-- (void)setLinkHandlerCallback:(void (^ _Nonnull)(NSString * _Nullable, BOOL, NSInteger))linkHandlerCallback {
-    [self.deeplinkManager setLinkHandlerCallback:linkHandlerCallback];
+- (id<SADeepLinkModuleProtocol>)deepLinkManager {
+    id module = [self moduleWithName:kSADeepLinkModuleName];
+    if ([module conformsToProtocol:@protocol(SADeepLinkModuleProtocol)] && [module conformsToProtocol:@protocol(SAModuleProtocol)]) {
+        id<SADeepLinkModuleProtocol, SAModuleProtocol> manager = module;
+        return manager.isEnable ? manager : nil;
+    }
+    return nil;
 }
 
 - (NSDictionary *)latestUtmProperties {
-    return self.deeplinkManager.latestUtmProperties;
+    return self.deepLinkManager.latestUtmProperties;
 }
 
 - (NSDictionary *)utmProperties {
-    return self.deeplinkManager.utmProperties;
+    return self.deepLinkManager.utmProperties;
 }
 
 - (void)clearUtmProperties {
-    [self.deeplinkManager clearUtmProperties];
+    [self.deepLinkManager clearUtmProperties];
+}
+
+@end
+
+#pragma mark -
+
+@implementation SAModuleManager (AutoTrack)
+
+- (id<SAAutoTrackModuleProtocol>)autoTrackManager {
+    id module = [self moduleWithName:kSAAutoTrackModuleName];
+    if ([module conformsToProtocol:@protocol(SAAutoTrackModuleProtocol)] && [module conformsToProtocol:@protocol(SAModuleProtocol)]) {
+        id<SAAutoTrackModuleProtocol, SAModuleProtocol> manager = module;
+        return manager.isEnable ? manager : nil;
+    }
+    return nil;
+}
+
+- (void)trackAppEndWhenCrashed {
+    [self.autoTrackManager trackAppEndWhenCrashed];
+}
+
+- (void)trackPageLeaveWhenCrashed {
+    [self.autoTrackManager trackPageLeaveWhenCrashed];
+}
+
+@end
+
+#pragma mark -
+
+@implementation SAModuleManager (Visualized)
+
+- (id<SAVisualizedModuleProtocol>)visualizedManager {
+    id module = [self moduleWithName:kSAVisualizedModuleName];
+    if ([module conformsToProtocol:@protocol(SAVisualizedModuleProtocol)] && [module conformsToProtocol:@protocol(SAModuleProtocol)]) {
+        id<SAVisualizedModuleProtocol, SAModuleProtocol> manager = module;
+        return manager.isEnable ? manager : nil;
+    }
+    return nil;
+}
+
+#pragma mark properties
+// 采集元素属性
+- (nullable NSDictionary *)propertiesWithView:(id)view {
+    return [self.visualizedManager propertiesWithView:view];
+}
+
+#pragma mark visualProperties
+// 采集元素自定义属性
+- (void)visualPropertiesWithView:(id)view completionHandler:(void (^)(NSDictionary *_Nullable))completionHandler {
+    id<SAVisualizedModuleProtocol> manager = self.visualizedManager;
+    if (!manager) {
+        return completionHandler(nil);
+    }
+    [self.visualizedManager visualPropertiesWithView:view completionHandler:completionHandler];
+}
+
+// 根据属性配置，采集 App 属性值
+- (void)queryVisualPropertiesWithConfigs:(NSArray <NSDictionary *>*)propertyConfigs completionHandler:(void (^)(NSDictionary *_Nullable properties))completionHandler {
+    id<SAVisualizedModuleProtocol> manager = self.visualizedManager;
+    if (!manager) {
+        return completionHandler(nil);
+    }
+    [manager queryVisualPropertiesWithConfigs:propertyConfigs completionHandler:completionHandler];
+}
+
+@end
+
+#pragma mark -
+
+@implementation SAModuleManager (JavaScriptBridge)
+
+- (NSString *)javaScriptSource {
+    NSMutableString *source = [NSMutableString string];
+    for (NSString *moduleName in self.moduleNames) {
+        id module = [self moduleWithName:moduleName];
+        if (!module) {
+            continue;
+        }
+        if ([module conformsToProtocol:@protocol(SAJavaScriptBridgeModuleProtocol)] && [module respondsToSelector:@selector(javaScriptSource)] && [module conformsToProtocol:@protocol(SAModuleProtocol)]) {
+            id<SAJavaScriptBridgeModuleProtocol, SAModuleProtocol>moduleObject = module;
+            NSString *javaScriptSource = [moduleObject javaScriptSource];
+            moduleObject.isEnable && javaScriptSource.length > 0 ? [source appendString:javaScriptSource] : nil;
+        }
+    }
+    return source;
+}
+
+@end
+
+@implementation SAModuleManager (RemoteConfig)
+
+- (id<SARemoteConfigModuleProtocol>)remoteConfigManager {
+    id module = [self moduleWithName:kSARemoteConfigModuleName];
+    if ([module conformsToProtocol:@protocol(SARemoteConfigModuleProtocol)] && [module conformsToProtocol:@protocol(SAModuleProtocol)]) {
+        id<SARemoteConfigModuleProtocol, SAModuleProtocol> manager = module;
+        return manager.isEnable ? manager : nil;
+    }
+    return nil;
+}
+
+- (void)retryRequestRemoteConfigWithForceUpdateFlag:(BOOL)isForceUpdate {
+    [self.remoteConfigManager retryRequestRemoteConfigWithForceUpdateFlag:isForceUpdate];
+}
+
+- (BOOL)isIgnoreEventObject:(SABaseEventObject *)obj {
+    return [self.remoteConfigManager isIgnoreEventObject:obj];
 }
 
 @end

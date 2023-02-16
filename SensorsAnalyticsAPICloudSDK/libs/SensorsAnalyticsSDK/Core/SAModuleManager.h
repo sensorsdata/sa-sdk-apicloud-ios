@@ -3,7 +3,7 @@
 // SensorsAnalyticsSDK
 //
 // Created by 张敏超🍎 on 2020/8/14.
-// Copyright © 2020 Sensors Data Co., Ltd. All rights reserved.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,34 +23,20 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NS_ENUM(NSUInteger, SAModuleType) {
-    SAModuleTypeLocation,
-    SAModuleTypeDeviceOrientation,
-    SAModuleTypeReactNative,
-    SAModuleTypeAppPush,
-};
-
 @interface SAModuleManager : NSObject <SAOpenURLProtocol>
 
-+ (void)startWithConfigOptions:(SAConfigOptions *)configOptions debugMode:(SensorsAnalyticsDebugMode)debugMode;
++ (void)startWithConfigOptions:(SAConfigOptions *)configOptions;
 
 + (instancetype)sharedInstance;
 
-/// 当前 SDK 中是否包含特定类型的模块
-/// @param type 需要判断的模块类型
-/// @return 是否包含
-- (BOOL)contains:(SAModuleType)type;
+- (BOOL)isDisableSDK;
 
-/// 通过模块类型获取模块的管理类
-/// @param type 模块类型
-/// @return 模块管理类
-- (nullable id<SAModuleProtocol>)managerForModuleType:(SAModuleType)type;
+/// 关闭所有的模块功能
+- (void)disableAllModules;
 
-/// 开启或关闭某种类型的模块
-/// @param enable 开启或者关闭
-/// @param type 模块类型
-- (void)setEnable:(BOOL)enable forModuleType:(SAModuleType)type;
-
+/// 更新数据接收地址
+/// @param serverURL 新的数据接收地址
+- (void)updateServerURL:(NSString *)serverURL;
 @end
 
 #pragma mark -
@@ -73,28 +59,37 @@ typedef NS_ENUM(NSUInteger, SAModuleType) {
 @end
 
 #pragma mark -
-
 @interface SAModuleManager (Encrypt) <SAEncryptModuleProtocol>
 
 @property (nonatomic, strong, readonly) id<SAEncryptModuleProtocol> encryptManager;
 
 @end
 
-@interface SAModuleManager (PushClick) <SAAppPushModuleProtocol>
+#pragma mark -
+
+@interface SAModuleManager (DeepLink) <SADeepLinkModuleProtocol>
 
 @end
 
 #pragma mark -
 
-@interface SAModuleManager (Gesture) <SAGestureModuleProtocol>
-
-@property (nonatomic, strong, readonly) id<SAGestureModuleProtocol> gestureManager;
+@interface SAModuleManager (AutoTrack) <SAAutoTrackModuleProtocol>
 
 @end
 
 #pragma mark -
 
-@interface SAModuleManager (Deeplink) <SADeeplinkModuleProtocol>
+@interface SAModuleManager (Visualized) <SAVisualizedModuleProtocol>
+
+@end
+
+#pragma mark -
+
+@interface SAModuleManager (JavaScriptBridge) <SAJavaScriptBridgeModuleProtocol>
+
+@end
+
+@interface SAModuleManager (RemoteConfig) <SARemoteConfigModuleProtocol>
 
 @end
 

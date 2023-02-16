@@ -3,7 +3,7 @@
 // SensorsAnalyticsSDK
 //
 // Created by 陈玉国 on 2021/1/18.
-// Copyright © 2021 Sensors Data Co., Ltd. All rights reserved.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,9 +23,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface SAAppPushManager : NSObject <SAAppPushModuleProtocol, SAModuleProtocol>
+@interface SAAppPushManager : NSObject <SAModuleProtocol>
+
++ (instancetype)defaultManager;
 
 @property (nonatomic, assign, getter=isEnable) BOOL enable;
+@property (nonatomic, strong) SAConfigOptions *configOptions;
 
 @end
 

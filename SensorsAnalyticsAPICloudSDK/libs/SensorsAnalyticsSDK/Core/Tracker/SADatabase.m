@@ -1,21 +1,21 @@
 //
-//  MessageQueueBySqlite.m
-//  SensorsAnalyticsSDK
+// MessageQueueBySqlite.m
+// SensorsAnalyticsSDK
 //
-//  Created by 曹犟 on 15/7/7.
-//  Copyright © 2015-2020 Sensors Data Co., Ltd. All rights reserved.
+// Created by 曹犟 on 15/7/7.
+// Copyright © 2015-2022 Sensors Data Co., Ltd. All rights reserved.
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 //
 
 #if ! __has_feature(objc_arc)
@@ -187,10 +187,12 @@ static const NSUInteger kRemoveFirstRecordsDefaultCount = 100; // 超过最大�
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(_database, sql.UTF8String, -1, &stmt, NULL) != SQLITE_OK) {
         SALogError(@"Prepare update records query failure: %s", sqlite3_errmsg(_database));
+        sqlite3_finalize(stmt);
         return NO;
     }
     if (sqlite3_step(stmt) != SQLITE_DONE) {
         SALogError(@"Failed to update records from database, error: %s", sqlite3_errmsg(_database));
+        sqlite3_finalize(stmt);
         return NO;
     }
     sqlite3_finalize(stmt);
@@ -280,6 +282,7 @@ static const NSUInteger kRemoveFirstRecordsDefaultCount = 100; // 超过最大�
 
     if (sqlite3_prepare_v2(_database, query.UTF8String, -1, &stmt, NULL) != SQLITE_OK) {
         SALogError(@"Prepare delete records query failure: %s", sqlite3_errmsg(_database));
+        sqlite3_finalize(stmt);
         return NO;
     }
     BOOL success = YES;
@@ -305,6 +308,7 @@ static const NSUInteger kRemoveFirstRecordsDefaultCount = 100; // 超过最大�
 
     if (sqlite3_prepare_v2(_database, query.UTF8String, -1, &stmt, NULL) != SQLITE_OK) {
         SALogError(@"Prepare delete records query failure: %s", sqlite3_errmsg(_database));
+        sqlite3_finalize(stmt);
         return NO;
     }
     if (sqlite3_step(stmt) != SQLITE_DONE) {
@@ -329,6 +333,8 @@ static const NSUInteger kRemoveFirstRecordsDefaultCount = 100; // 超过最大�
     if (sqlite3_exec(_database, sql.UTF8String, NULL, NULL, NULL) != SQLITE_OK) {
         SALogError(@"Failed to delete all records");
         return NO;
+    } else {
+        SALogDebug(@"Delete all records successfully");
     }
     self.count = 0;
     return YES;
@@ -361,6 +367,7 @@ static const NSUInteger kRemoveFirstRecordsDefaultCount = 100; // 超过最大�
         int result = sqlite3_prepare_v2(_database, sql.UTF8String, -1, &stmt, NULL);
         if (result != SQLITE_OK) {
             SALogError(@"sqlite stmt prepare error (%d): %s", result, sqlite3_errmsg(_database));
+            sqlite3_finalize(stmt);
             return NULL;
         }
         CFDictionarySetValue(_dbStmtCache, (__bridge const void *)(sql), stmt);
@@ -383,6 +390,7 @@ static const NSUInteger kRemoveFirstRecordsDefaultCount = 100; // 超过最大�
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(_database, query.UTF8String, -1, &stmt, NULL) != SQLITE_OK) {
         SALogError(@"Prepare PRAGMA table_info query failure: %s", sqlite3_errmsg(_database));
+        sqlite3_finalize(stmt);
         return columns;
     }
 
@@ -400,8 +408,9 @@ static const NSUInteger kRemoveFirstRecordsDefaultCount = 100; // 超过最大�
     return columns;
 }
 
+//默认添加一个整型的默认值为 0 的一列
 - (BOOL)createColumn:(NSString *)columnName inTable:(NSString *)tableName {
-    if ([self columnExists:kDatabaseColumnStatus inTable:kDatabaseTableName]) {
+    if ([self columnExists:columnName inTable:tableName]) {
         return YES;
     }
 
@@ -410,10 +419,12 @@ static const NSUInteger kRemoveFirstRecordsDefaultCount = 100; // 超过最大�
 
     if (sqlite3_prepare_v2(_database, query.UTF8String, -1, &stmt, NULL) != SQLITE_OK) {
         SALogError(@"Prepare create column query failure: %s", sqlite3_errmsg(_database));
+        sqlite3_finalize(stmt);
         return NO;
     }
     if (sqlite3_step(stmt) != SQLITE_DONE) {
         SALogError(@"Failed to create column, error: %s", sqlite3_errmsg(_database));
+        sqlite3_finalize(stmt);
         return NO;
     }
     sqlite3_finalize(stmt);
